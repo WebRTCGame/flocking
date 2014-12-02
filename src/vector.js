@@ -1,42 +1,39 @@
+/*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
+/* global $:true, Vector:true, Fish:true, Food:true */
+
 // helper library to work with vectors
 
-function Vector(x, y)
-{
+function Vector(x, y) {
 	this.x = x;
 	this.y = y;
 }
 
 Vector.prototype = {
-	set: function(x, y)
-	{
+	set: function(x, y) {
 		this.x = x;
 		this.y = y;
 
 		return this;
 	},
-	add: function(v)
-	{
+	add: function(v) {
 		this.x += v.x;
 		this.y += v.y;
 
 		return this;
 	},
-	sub: function(v)
-	{
+	sub: function(v) {
 		this.x -= v.x;
 		this.y -= v.y;
 
 		return this;
 	},
-	mul: function(s)
-	{
+	mul: function(s) {
 		this.x *= s;
 		this.y *= s;
 
 		return this;
 	},
-	div: function(s)
-	{
+	div: function(s) {
 		!s && console.log("Division by zero!");
 
 		this.x /= s;
@@ -44,67 +41,57 @@ Vector.prototype = {
 
 		return this;
 	},
-	mag: function(){
+	mag: function() {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	},
-	normalize: function()
-	{
+	normalize: function() {
 		var mag = this.mag();
 		mag && this.div(mag);
 		return this;
 	},
-	angle: function()
-	{
+	angle: function() {
 		return Math.atan2(this.y, this.x);
 	},
-	setMag: function(m)
-	{
+	setMag: function(m) {
 		var angle = this.angle();
 		this.x = m * Math.cos(angle);
 		this.y = m * Math.sin(angle);
 		return this;
 	},
-	setAngle: function(a)
-	{
+	setAngle: function(a) {
 		var mag = this.mag();
 		this.x = mag * Math.cos(a);
 		this.y = mag * Math.sin(a);
 		return this;
 	},
-	rotate: function(a)
-	{
+	rotate: function(a) {
 		this.setAngle(this.angle() + a);
 		return this;
 	},
-	limit: function(l)
-	{
+	limit: function(l) {
 		var mag = this.mag();
-		if(mag > l)
+		if (mag > l) {
 			this.setMag(l);
+		}
 		return this;
 	},
-	angleBetween: function(v)
-	{
+	angleBetween: function(v) {
 		return this.angle() - v.angle();
 	},
-	dot: function(v)
-	{
+	dot: function(v) {
 		return this.x * v.x + this.y * v.y;
 	},
-	lerp: function(v, amt)
-	{
+	lerp: function(v, amt) {
 		this.x += (v.x - this.x) * amt;
 		this.y += (v.y - this.y) * amt;
 		return this;
 	},
-	dist: function(v)
-	{
+	dist: function(v) {
 		var dx = this.x - v.x;
 		var dy = this.y - v.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	},
-	copy: function()
-	{
+	copy: function() {
 		return new Vector(this.x, this.y);
 	}
-}
+};
