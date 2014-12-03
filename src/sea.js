@@ -31,7 +31,7 @@ $(function() {
 
 	// internal use
 	//var time = null;
-	var interval = 20;
+	//var interval = 20;
 	//var steps = 0;
 
 	// user-events listeners (clicks and keys)
@@ -124,13 +124,23 @@ $(function() {
 
 			/*-- makes the fish compute an action (which direction to swim)
 			according to the information it can get from the environment --*/
+			//fish.swim(sea);
 			fish.swim(sea);
-
 			// update the fish (position and state)
-			fish.update(sea);
+			fish.doUpdate(sea);
+
 
 			// draw the fish
-			fish.draw(ctx);
+			if (fish.location.x > 0 && fish.location.x < window.innerWidth) {
+				if (fish.location.y > 0 && fish.location.y < window.innerHeight) {
+fish.doRender(ctx);
+				}
+
+			}
+
+
+
+			
 
 			// if dead, add the fish to the dead list
 			if (fish.dead) {
@@ -161,10 +171,10 @@ $(function() {
 				info.html("Population: " + sea.population.length);
 
 				// clear the screen (with a fade)
-				ctx.globalAlpha = 0.8;
+				//ctx.globalAlpha = 0.8;
 				ctx.fillStyle = "#ffffff";
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
-				ctx.globalAlpha = 1;
+				ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+				//ctx.globalAlpha = 1;
 
 				// update the food
 				updateFood();

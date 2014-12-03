@@ -1,3 +1,6 @@
+/*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
+/* global $:true, Vector:true, Fish:true, Food:true, utils:true */
+
 /**
  * Normalize the browser animation API across implementations. This requests
  * the browser to schedule a repaint of the window for the next animation frame.
@@ -206,4 +209,96 @@ window.utils.intersects = function(rectA, rectB) {
         rectB.x + rectB.width < rectA.x ||
         rectA.y + rectA.height < rectB.y ||
         rectB.y + rectB.height < rectA.y);
+};
+
+window.utils.interpolateColor = function(colorA, colorB) {
+	var interpolation = -1,
+		difference = Math.abs(colorA - colorB);
+
+	if (difference > 0.5) {
+		interpolation = (colorA > colorB ? colorA : colorB) + (1 - difference) / 2;
+
+		if (interpolation > 1) {
+			interpolation -= 1;
+		}
+
+	}
+	else {
+		interpolation = (colorA + colorB) / 2;
+	}
+
+	return interpolation;
+};
+
+window.utils.rgb2hex = function(rgb) {
+	rgb.r |= 0;
+	rgb.g |= 0;
+	rgb.b |= 0;
+
+	var r = rgb.r.toString(16);
+	var g = rgb.g.toString(16);
+	var b = rgb.b.toString(16);
+
+	r = r.length === 1 ? "0" + r : r;
+	g = g.length === 1 ? "0" + g : g;
+	b = b.length === 1 ? "0" + b : b;
+
+	return "#" + r.substr(0, 2) + g.substr(0, 2) + b.substr(0, 2);
+};
+
+window.utils.hsv2rgb = function(h, s, v) {
+	var r, g, b, i, f, p, q, t;
+	if (h && s === undefined && v === undefined) {
+		s = h.s, v = h.v, h = h.h;
+	}
+	i = Math.floor(h * 6);
+	f = h * 6 - i;
+	p = v * (1 - s);
+	q = v * (1 - f * s);
+	t = v * (1 - (1 - f) * s);
+	switch (i % 6) {
+		case 0:
+			r = v, g = t, b = p;
+			break;
+		case 1:
+			r = q, g = v, b = p;
+			break;
+		case 2:
+			r = p, g = v, b = t;
+			break;
+		case 3:
+			r = p, g = q, b = v;
+			break;
+		case 4:
+			r = t, g = p, b = v;
+			break;
+		case 5:
+			r = v, g = p, b = q;
+			break;
+	}
+	return {
+		r: Math.floor(r * 255),
+		g: Math.floor(g * 255),
+		b: Math.floor(b * 255)
+	};
+};
+
+window.utils.hex2rgb = function(h) {
+	var hex = h.toString().substr(1);
+	var r = parseInt(hex[0] + hex[1], 16);
+	var g = parseInt(hex[2] + hex[3], 16);
+	var b = parseInt(hex[4] + hex[5], 16);
+
+	return {
+		r: r,
+		g: g,
+		b: b
+	};
+};
+
+
+window.utils.hue2hex = function(hue) {
+	var rgb = utils.hsv2rgb(hue, 1, 1);
+	var hex = utils.rgb2hex(rgb);
+	return hex;
 };
