@@ -7,7 +7,7 @@ relationship between the fish's properties and its mass */
 var Globals = (function() {
 	return {
 		ENERGY: 10,
-		MAX_SPEED: 12,
+		MAX_SPEED: 8,
 		MAX_FORCE: 0.1,
 		SEPARATION_RANGE: 30,
 		LOOK_RANGE: 100,
@@ -20,7 +20,7 @@ var Globals = (function() {
 
 
 var ENERGY = 10,
-	MAX_SPEED = 12,
+	MAX_SPEED = 8,
 	MAX_FORCE = 0.1,
 	SEPARATION_RANGE = 30,
 	LOOK_RANGE = 100,
@@ -37,6 +37,7 @@ function Fish(mass, x, y, hue) {
 		this.ID = Fish.uid();
 		this.mass = mass > 0 ? mass : -mass;
 		//this.energy = this.mass * ENERGY;
+		
 		this._energy = this.mass * ENERGY;
 		Object.defineProperty(this, 'energy', {
 			get: function() {
@@ -90,7 +91,11 @@ Fish.prototype = Object.create(BaseRenderable.prototype);
 
 // fish's methods
 
+Fish.prototype.isHungry = function() {
+	var maxEnergy = this.mass * ENERGY;
 
+	return maxEnergy * 0.8 > this.energy;
+};
 // computes all the information from the enviroment and decides in which direction swim
 Fish.prototype.swim = function swim(sea) {
 
@@ -161,7 +166,9 @@ Fish.prototype.swim = function swim(sea) {
 
 
 	if (smaller.length) {
-		this.eat(smaller);
+		if (this.isHungry()) {
+			this.eat(smaller);
+		}
 	}
 
 	if (mature.length) {
@@ -198,6 +205,9 @@ Fish.prototype.eat = function eat(fishList) {
 
 	this.chase(fishList, function(fish) {
 		that.energy += fish.energy;
+		if (that.energy > that.mass * ENERGY){
+			that.energy = that.mass * ENERGY;
+		}
 		fish.energy = 0;
 	});
 
@@ -212,10 +222,10 @@ Fish.prototype.shoal = function shoal() {
 	//this.shoalList = fishList;
 
 	// compute vectors
-	var separation = Behaviors.separate(this,this.shoalList,this.separationRange).limit(this.maxforce);//this.separate(fishList, this.separationRange).limit(this.maxforce);
-	var alignment = Behaviors.align(this,this.shoalList).limit(this.maxforce);//this.align(fishList).limit(this.maxforce);
-	var cohesion = Behaviors.cohesion(this,this.shoalList).limit(this.maxforce);//this.cohesion(fishList).limit(this.maxforce);
-	var affinity = Behaviors.affinity(this,this.shoalList);//this.affinity(this.shoalList);
+	var separation = Behaviors.separate(this, this.shoalList, this.separationRange).limit(this.maxforce); //this.separate(fishList, this.separationRange).limit(this.maxforce);
+	var alignment = Behaviors.align(this, this.shoalList).limit(this.maxforce); //this.align(fishList).limit(this.maxforce);
+	var cohesion = Behaviors.cohesion(this, this.shoalList).limit(this.maxforce); //this.cohesion(fishList).limit(this.maxforce);
+	var affinity = Behaviors.affinity(this, this.shoalList); //this.affinity(this.shoalList);
 
 	/*-- shoal with fishes of very different colors won't stay
 	together as tightly as shoals of fishes of the same color --*/
@@ -239,7 +249,8 @@ Fish.prototype.mate = function mate(fishList, seaPopulation) {
 	var that = this;
 
 	this.chase(fishList, function(fish) {
-
+that.energy *= 0.5;
+fish.energy *= 0.5;
 		// set both fishes unable to mate till reaching next fertility threashold
 		that.fertility += that.mass;
 		that.mature = false;
@@ -261,6 +272,7 @@ Fish.prototype.mate = function mate(fishList, seaPopulation) {
 		var offspring = new Fish(mass, location.x, location.y, color);
 
 		// add to sea population
+		seaPopulation.push(offspring);
 		seaPopulation.push(offspring);
 	}, 400);
 
@@ -472,14 +484,20 @@ Fish.prototype.draw = Fish.prototype.render = function render(ctx) {
 	}
 
 	// draw the fish on the canvas
-	ctx.lineWidth = 2;
+	//ctx.lineWidth = 2;
 	ctx.fillStyle = this.color;
-	ctx.strokeStyle = this.color;
+	//ctx.strokeStyle = this.color;
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
-	ctx.quadraticCurveTo(x2, y2, x, y);
-	ctx.quadraticCurveTo(x3, y3, x1, y1);
-	ctx.stroke();
+	ctx.lineTo(x3,y3);
+	ctx.lineTo(x,y);
+	ctx.lineTo(x2,y2);
+	
+	
+	ctx.closePath();
+	//ctx.quadraticCurveTo(x2, y2, x, y);
+	//ctx.quadraticCurveTo(x3, y3, x1, y1);
+	//ctx.stroke();
 	ctx.fill();
 };
 Fish.prototype.drawBehavior = function drawBehavior(ctx) {
@@ -562,7 +580,7 @@ Fish.prototype.update = function update(sea) {
 	this.acceleration.limit(this.maxforce);
 
 	// spend energy
-	this.energy -= ((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100;
+	this.energy -= (((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100)*1.1;
 
 	// die
 	/*

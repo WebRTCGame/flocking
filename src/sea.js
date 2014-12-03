@@ -3,7 +3,7 @@
 
 $(function() {
 	// POPULATION SETUP
-	var POPULATION = 60;
+	var POPULATION = 260;
 	var MIN_MASS = 0.5;
 	var MAX_MASS = 3.5;
 	var FOOD_RATIO = 0.2;
@@ -49,8 +49,8 @@ $(function() {
 	// resizing the dimesions of the sea when resising the screen
 	$(window).resize(function() {
 		// resize sea
-		sea.width = $(window).width() * SCREEN;
-		sea.height = $(window).height() * SCREEN;
+		sea.width = window.innerWidth;//$(window).width() * SCREEN;
+		sea.height = window.innerHeight;//$(window).height() * SCREEN;
 
 		// resize canvas element
 		var e = document.getElementById("canvas");
@@ -131,16 +131,16 @@ $(function() {
 
 
 			// draw the fish
-			if (fish.location.x > 0 && fish.location.x < window.innerWidth) {
-				if (fish.location.y > 0 && fish.location.y < window.innerHeight) {
-fish.doRender(ctx);
-				}
+			//if (fish.location.x > 0 && fish.location.x < window.innerWidth) {
+				//if (fish.location.y > 0 && fish.location.y < window.innerHeight) {
+					fish.doRender(ctx);
+				//}
 
-			}
+			//}
 
 
 
-			
+
 
 			// if dead, add the fish to the dead list
 			if (fish.dead) {
@@ -173,7 +173,7 @@ fish.doRender(ctx);
 				// clear the screen (with a fade)
 				//ctx.globalAlpha = 0.8;
 				ctx.fillStyle = "#ffffff";
-				ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+				ctx.fillRect(0, 0, sea.width, sea.height);
 				//ctx.globalAlpha = 1;
 
 				// update the food

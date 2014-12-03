@@ -59,7 +59,9 @@ Food.prototype = {
 	// get a bite by a fish
 	eatenBy: function(fish)
 	{
+		if (fish.energy < fish.mass * ENERGY){
 		this.energy -= fish.bite;
 		fish.energy += fish.bite;
+		}
 	}
 }
