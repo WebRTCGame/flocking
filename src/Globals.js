@@ -16,5 +16,7 @@ Sim.globals = {
         MIN_MASS: 0.5,
         MAX_MASS: 3.5,
         FOOD_RATIO: 0.2,
-        SCREEN: 1.5
+        SCREEN: 1.5,
+        HALF_PI : Math.PI * 0.5,
+        TWO_PI: Math.PI * 2
     };

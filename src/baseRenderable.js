@@ -3,8 +3,10 @@
 
 var BaseRenderable = function(x, y) {
     this.location = new Vector(x, y);
+    this.init();
 };
 BaseRenderable.prototype = {
+    init: function() {},
     update: function(ctx) {},
     render: function(ctx) {},
     doUpdate: function(val) {
@@ -12,5 +14,6 @@ BaseRenderable.prototype = {
     },
     doRender: function(ctx) {
         this.render(ctx);
-    }
+    },
+    dead: false
 };
