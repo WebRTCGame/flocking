@@ -1,5 +1,5 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global $:true, Vector:true, Fish:true, Food:true, utils:true, BaseRenderable:true, Behaviors: true */
+/* global   */
 var Sim = {};
 Sim.globals = {
    
