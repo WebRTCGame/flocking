@@ -1,33 +1,21 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global $:true, Vector:true, Fish:true, Food:true, utils:true, BaseRenderable:true, Behaviors: true */
+/* global $:true, Vector:true, Fish:true, Food:true, utils:true, BaseRenderable:true, Behaviors: true, Sim:true */
 
 /* MASS MULTIPLIERS - these values represent the 
 relationship between the fish's properties and its mass */
 
-var Globals = (function() {
-	return {
-		ENERGY: 10,
-		MAX_SPEED: 8,
-		MAX_FORCE: 0.1,
-		SEPARATION_RANGE: 30,
-		LOOK_RANGE: 100,
-		SMELL_RANGE: 300,
-		LENGTH: 20,
-		FERTILITY: 0.1,
-		BITE: 0.1
-	};
-})();
 
 
-var ENERGY = 10,
-	MAX_SPEED = 8,
-	MAX_FORCE = 0.1,
-	SEPARATION_RANGE = 30,
-	LOOK_RANGE = 100,
-	SMELL_RANGE = 300,
-	LENGTH = 20,
-	FERTILITY = 0.1,
-	BITE = 0.1;
+
+ //ENERGY = 10,
+	//var MAX_SPEED = 8,
+	//var MAX_FORCE = 0.1,
+//var	SEPARATION_RANGE = 30;
+//var	LOOK_RANGE = 100,
+	//SMELL_RANGE = 300,
+	//LENGTH = 20,
+	//FERTILITY = 0.1,
+	//BITE = 0.1;
 
 
 // Fish constructor
@@ -38,7 +26,7 @@ function Fish(mass, x, y, hue) {
 		this.mass = mass > 0 ? mass : -mass;
 		//this.energy = this.mass * ENERGY;
 		
-		this._energy = this.mass * ENERGY;
+		this._energy = this.mass * Sim.globals.ENERGY;
 		Object.defineProperty(this, 'energy', {
 			get: function() {
 				return this._energy;
@@ -54,12 +42,12 @@ function Fish(mass, x, y, hue) {
 			configurable: true
 		});
 
-		this.maxspeed = MAX_SPEED * this.mass;
-		this.maxforce = MAX_FORCE / (this.mass * this.mass);
-		this.separationRange = this.mass * SEPARATION_RANGE;
-		this.lookRange = this.mass * LOOK_RANGE;
-		this.smellRange = this.mass * SMELL_RANGE;
-		this.length = mass * LENGTH;
+		this.maxspeed = Sim.globals.MAX_SPEED * this.mass;
+		this.maxforce = Sim.globals.MAX_FORCE / (this.mass * this.mass);
+		this.separationRange = this.mass * Sim.globals.SEPARATION_RANGE;
+		this.lookRange = this.mass * Sim.globals.LOOK_RANGE;
+		this.smellRange = this.mass * Sim.globals.SMELL_RANGE;
+		this.length = mass * Sim.globals.LENGTH;
 		this.base = this.length * 0.5;
 		//this.location = new Vector(x, y);
 		this.velocity = new Vector(0, 0);
@@ -73,9 +61,9 @@ function Fish(mass, x, y, hue) {
 		this.skin = this.color;
 		this.dead = false;
 		this.age = 1;
-		this.fertility = (this.mass) * FERTILITY + 1;
+		this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
 		this.mature = false;
-		this.bite = this.mass * BITE;
+		this.bite = this.mass * Sim.globals.BITE;
 
 		// helper
 		this.HALF_PI = Math.PI * 0.5;
@@ -92,13 +80,12 @@ Fish.prototype = Object.create(BaseRenderable.prototype);
 // fish's methods
 
 Fish.prototype.isHungry = function() {
-	var maxEnergy = this.mass * ENERGY;
+	var maxEnergy = this.mass * Sim.globals.ENERGY;
 
 	return maxEnergy * 0.8 > this.energy;
 };
 // computes all the information from the enviroment and decides in which direction swim
 Fish.prototype.swim = function swim(sea) {
-
 
 	// nearby food
 	var nearbyFood = this.look(sea.food, this.smellRange, Math.PI * 2);
@@ -117,7 +104,9 @@ Fish.prototype.swim = function swim(sea) {
 			}
 		}
 	}
-
+	
+//Starving
+//if (this.energy < (this.mass * Sim.globals.ENERGY * 0.1)){return;}
 
 	// surrounding fishes
 	var neighboors = this.look(sea.population, this.lookRange, Math.PI * 2);
@@ -205,8 +194,8 @@ Fish.prototype.eat = function eat(fishList) {
 
 	this.chase(fishList, function(fish) {
 		that.energy += fish.energy;
-		if (that.energy > that.mass * ENERGY){
-			that.energy = that.mass * ENERGY;
+		if (that.energy > that.mass * Sim.globals.ENERGY){
+			that.energy = that.mass * Sim.globals.ENERGY;
 		}
 		fish.energy = 0;
 	});
@@ -273,6 +262,7 @@ fish.energy *= 0.5;
 
 		// add to sea population
 		seaPopulation.push(offspring);
+		
 		seaPopulation.push(offspring);
 	}, 400);
 
@@ -484,7 +474,7 @@ Fish.prototype.draw = Fish.prototype.render = function render(ctx) {
 	}
 
 	// draw the fish on the canvas
-	//ctx.lineWidth = 2;
+	ctx.lineWidth = this.energy / 3;
 	ctx.fillStyle = this.color;
 	//ctx.strokeStyle = this.color;
 	ctx.beginPath();
@@ -499,6 +489,7 @@ Fish.prototype.draw = Fish.prototype.render = function render(ctx) {
 	//ctx.quadraticCurveTo(x3, y3, x1, y1);
 	//ctx.stroke();
 	ctx.fill();
+	ctx.stroke();
 };
 Fish.prototype.drawBehavior = function drawBehavior(ctx) {
 	if (Fish.showBehavior) {
@@ -580,7 +571,7 @@ Fish.prototype.update = function update(sea) {
 	this.acceleration.limit(this.maxforce);
 
 	// spend energy
-	this.energy -= (((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100)*1.1;
+	this.energy -= (((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100)*2;
 
 	// die
 	/*

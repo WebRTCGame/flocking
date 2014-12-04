@@ -1,13 +1,13 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global $:true, Vector:true, Fish:true, Food:true */
+/* global $:true, Vector:true, Fish:true, Food:true, Sim:true */
 
 $(function() {
 	// POPULATION SETUP
-	var POPULATION = 260;
-	var MIN_MASS = 0.5;
-	var MAX_MASS = 3.5;
-	var FOOD_RATIO = 0.2;
-	var SCREEN = 1.5;
+	//var POPULATION = 260;
+	//var MIN_MASS = 0.1;
+	//var MAX_MASS = 3.5;
+	//var FOOD_RATIO = 0.2;
+	//var SCREEN = 1.5;
 	var fps = 30;
 	var now;
 	var then = Date.now();
@@ -26,7 +26,13 @@ $(function() {
 		height: 0,
 		population: [],
 		food: [],
-		canvas: ctx
+		randomPoint: function() {
+				return {
+					x: Math.random() * this.width,
+					y: Math.random() * this.height
+				}
+			} //,
+			//canvas: ctx
 	};
 
 	// internal use
@@ -49,8 +55,8 @@ $(function() {
 	// resizing the dimesions of the sea when resising the screen
 	$(window).resize(function() {
 		// resize sea
-		sea.width = window.innerWidth;//$(window).width() * SCREEN;
-		sea.height = window.innerHeight;//$(window).height() * SCREEN;
+		sea.width = window.innerWidth; //$(window).width() * SCREEN;
+		sea.height = window.innerHeight; //$(window).height() * SCREEN;
 
 		// resize canvas element
 		var e = document.getElementById("canvas");
@@ -59,30 +65,31 @@ $(function() {
 	}).resize();
 
 	// populate the sea
-	for (var i = 0; i < POPULATION; i++) {
+	for (var i = 0; i < Sim.globals.POPULATION; i++) {
 		// random setup
-		var randomX = Math.random() * sea.width;
-		var randomY = Math.random() * sea.height;
+		var randomPoint = sea.randomPoint();
+		//var randomX = Math.random() * sea.width;
+		//var randomY = Math.random() * sea.height;
 		var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
-		var randomMass = MIN_MASS + fourRandoms * MAX_MASS;
+		var randomMass = Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
 
 		// create fish
-		var fish = new Fish(randomMass, randomX, randomY);
+		var fish = new Fish(randomMass, randomPoint.x, randomPoint.y);
 
 		// add fish to the sea population
 		sea.population.push(fish);
 	}
 
 	// add food to the sea
-	var initialFood = POPULATION * FOOD_RATIO;
+	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
 	for (var i = 0; i < initialFood; i++) {
 		// initial values
-		var randomX2 = Math.random() * sea.width;
-		var randomY2 = Math.random() * sea.height;
+		var randomPoint2 = sea.randomPoint();
+
 		var foodAmmount = Math.random() * 100 + 20;
 
 		// create food
-		var food = new Food(randomX2, randomY2, foodAmmount);
+		var food = new Food(randomPoint2.x, randomPoint2.y, foodAmmount);
 		sea.food.push(food);
 	}
 
@@ -107,52 +114,30 @@ $(function() {
 	}
 
 	function updateFish() {
-
-		// list of fish that died during this time-step
-		var deadList = [];
-
-		// update all the fishes
-		for (var i in sea.population) {
-			// current fish
-			var fish = sea.population[i];
-
-			// if the fish is dead or null, skip it
-			if (fish === null) {
-				deadList.push(i);
-				continue;
-			}
-
-			/*-- makes the fish compute an action (which direction to swim)
-			according to the information it can get from the environment --*/
-			//fish.swim(sea);
-			fish.swim(sea);
-			// update the fish (position and state)
-			fish.doUpdate(sea);
-
-
-			// draw the fish
-			//if (fish.location.x > 0 && fish.location.x < window.innerWidth) {
-				//if (fish.location.y > 0 && fish.location.y < window.innerHeight) {
-					fish.doRender(ctx);
-				//}
-
-			//}
-
-
-
-
-
-			// if dead, add the fish to the dead list
-			if (fish.dead) {
-				sea.population[i] = null;
-				deadList.push(i);
-			}
+		function isNotDead(element) {
+  //var isDead = element === null || element.dead;
+  return element !== null;
+}
+		//console.log(sea.population.length);
+		sea.population = sea.population.filter(isNotDead);
+//console.log(sea.population.length);
+//console.log(sea.population[0].location);
+		for (var i in sea.population){
+		
+			
+			sea.population[i].swim(sea);
+			sea.population[i].doUpdate(sea);
+			sea.population[i].draw(ctx);
+			if (sea.population[i].location.x < -50){sea.population[i].location.x = -30;}
+			if (sea.population[i].location.x > sea.width + 50){sea.population[i].location.x = sea.width + 30;}
+			if (sea.population[i].location.y < -50){sea.population[i].location.y = -30;}
+			if (sea.population[i].location.y > sea.height + 50){sea.population[i].location.y = sea.height + 30;}
+			if (sea.population[i].dead) {
+				sea.population[i] = null
+			};
+			
 		}
 
-		// clean all the dead fishes from the sea population
-		for (var j in deadList) {
-			sea.population.splice(deadList[j], 1);
-		}
 	}
 
 
