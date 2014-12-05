@@ -36,7 +36,7 @@ Fish.prototype.init = function() {
 	this.smellRange = this.mass * Sim.globals.SMELL_RANGE;
 	this.length = this.mass * Sim.globals.LENGTH;
 	this.base = this.length * 0.5;
-	
+
 	this.velocity = new Vector(0, 0);
 	this.acceleration = new Vector(0, 0);
 	this.wandering = new Vector(0.2, 0.2);
@@ -45,6 +45,10 @@ Fish.prototype.init = function() {
 	this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
 	this.mature = false;
 	this.bite = this.mass * Sim.globals.BITE;
+	this.shoalList = [];
+	this.avoidList = [];
+	this.eatList = [];
+	this.mateList = [];
 };
 // fish's methods
 
@@ -54,18 +58,20 @@ Fish.prototype.isHungry = function() {
 	return maxEnergy * 0.8 > this.energy;
 };
 // computes all the information from the enviroment and decides in which direction swim
-Fish.prototype.swim = function (sea) {
+Fish.prototype.swim = function(sea) {
 
 	// nearby food
 	var nearbyFood = this.look(sea.food, this.smellRange, Sim.globals.TWO_PI);
 
 	// eat food
+	if (nearbyFood.length){
 	for (var index in nearbyFood) {
 		var food = nearbyFood[index];
-		if (food && !food.dead) {
+		if (food && !food.dead && food !== null && food !== undefined) {
 			// go to the food
+			
 			Behaviors.follow(this, food.location, food.radius / 10);
-
+			
 			// if close enough...
 			if (this.location.dist(food.location) < food.radius) {
 				// eat the food
@@ -73,41 +79,39 @@ Fish.prototype.swim = function (sea) {
 			}
 		}
 	}
-
+}
 	//Starving
 	//if (this.energy < (this.mass * Sim.globals.ENERGY * 0.1)){return;}
 
-	// surrounding fishes
 	var neighboors = this.look(sea.population, this.lookRange, Sim.globals.TWO_PI);
 
+	this.shoalList = [];
+	this.avoidList = [];
+	this.eatList = [];
+	this.mateList = [];
 
-	var friends = [];
-	var bigger = [];
-	var smaller = [];
-	var mature = [];
 	for (var i = 0; i < neighboors.length; i++) {
 		var other = neighboors[i];
 		if (other !== this) {
 			if (other.mass < this.mass / 2) {
-				smaller.push(other);
+				this.eatList.push(other);
 			}
 			else if (other.mass > this.mass * 2) {
-				bigger.push(other);
+				this.avoidList.push(other);
 			}
 			else {
-				friends.push(other);
+				this.shoalList.push(other);
 			}
 		}
 		if (this.mature) {
 			if (other.mature) {
-				mature.push(other);
+				this.mateList.push(other);
 			}
 		}
 
 	}
 
-	if (friends.length) {
-		this.shoalList = friends;
+	if (this.shoalList.length) {
 		if (this.showBehavior) {
 			this.color = 'black';
 		}
@@ -115,27 +119,22 @@ Fish.prototype.swim = function (sea) {
 
 	}
 	else {
-		//this.wander(200);
 		Behaviors.wander(this);
 	}
 
 
-	if (bigger.length) {
-		this.avoidList = bigger;
-		//this.avoid(bigger, 300);
+	if (this.avoidList.length) {
 		Behaviors.avoid(this, 300);
 	}
 
 
-	if (smaller.length) {
-		this.eatList = smaller;
+	if (this.eatList.length) {
 		if (this.isHungry()) {
 			this.eat();
 		}
 	}
 
-	if (mature.length) {
-		this.mateList = mature;
+	if (this.mateList.length) {
 		this.mate(sea.population);
 	}
 
@@ -196,6 +195,7 @@ Fish.prototype.mate = function mate(seaPopulation) {
 		seaPopulation.push(offspring);
 
 		seaPopulation.push(offspring);
+
 	}, 400);
 
 	if (Fish.showBehavior) {
@@ -243,8 +243,8 @@ Fish.prototype.look = function(fishList, radius, angle) {
 };
 
 
-Fish.prototype.draw = Fish.prototype.render = function (ctx) {
-
+Fish.prototype.draw = Fish.prototype.render = function() {
+	var ctx = Sim.globals.ctx;
 	// get the points to draw the fish
 	var angle = this.velocity.angle();
 
@@ -290,7 +290,8 @@ Fish.prototype.draw = Fish.prototype.render = function (ctx) {
 	ctx.stroke();
 };
 
-Fish.prototype.drawBehavior = function drawBehavior(ctx) {
+Fish.prototype.drawBehavior = function drawBehavior() {
+	var ctx = Sim.globals.ctx;
 	if (Fish.showBehavior) {
 		var old = ctx.globalAlpha;
 		ctx.globalAlpha = 0.2;
@@ -357,7 +358,7 @@ Fish.prototype.drawBehavior = function drawBehavior(ctx) {
 	}
 };
 
-Fish.prototype.update = function update(sea) {
+Fish.prototype.update = function() {
 	// move the fish
 	//this.swim(sea);
 	this.velocity.add(this.acceleration);

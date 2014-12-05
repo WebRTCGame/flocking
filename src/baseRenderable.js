@@ -1,5 +1,5 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global $:true, Vector:true, Fish:true, Food:true, utils:true */
+/* global Vector:true */
 
 var BaseRenderable = function(x, y) {
     this.location = new Vector(x, y);
@@ -7,13 +7,17 @@ var BaseRenderable = function(x, y) {
 };
 BaseRenderable.prototype = {
     init: function() {},
-    update: function(ctx) {},
-    render: function(ctx) {},
+    update: function() {},
+    render: function() {},
     doUpdate: function(val) {
+        if (!this.dead){
         this.update(val);
+        }
     },
-    doRender: function(ctx) {
-        this.render(ctx);
+    doRender: function() {
+        if (!this.dead){
+        this.render();
+        }
     },
     dead: false
 };

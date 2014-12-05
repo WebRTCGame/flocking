@@ -109,52 +109,54 @@ Behaviors.affinity = function(fish, fishList) {
 };
 
 Behaviors.shoal = function(fish) {
-	//this.shoalList = fishList;
+    //this.shoalList = fishList;
 
-	// compute vectors
-	var separation = Behaviors.separate(fish, fish.shoalList, fish.separationRange).limit(fish.maxforce); 
-	var alignment = Behaviors.align(fish, fish.shoalList).limit(fish.maxforce); 
-	var cohesion = Behaviors.cohesion(fish, fish.shoalList).limit(fish.maxforce);
-	var affinity = Behaviors.affinity(fish, fish.shoalList);
+    // compute vectors
+    var separation = Behaviors.separate(fish, fish.shoalList, fish.separationRange).limit(fish.maxforce);
+    var alignment = Behaviors.align(fish, fish.shoalList).limit(fish.maxforce);
+    var cohesion = Behaviors.cohesion(fish, fish.shoalList).limit(fish.maxforce);
+    var affinity = Behaviors.affinity(fish, fish.shoalList);
 
-	/*-- shoal with fishes of very different colors won't stay
+    /*-- shoal with fishes of very different colors won't stay
 	together as tightly as shoals of fishes of the same color --*/
-	separation.mul(1.2);
-	alignment.mul(1.2 * affinity);
-	cohesion.mul(1 * affinity);
+    separation.mul(1.2);
+    alignment.mul(1.2 * affinity);
+    cohesion.mul(1 * affinity);
 
-	// apply forces
-	fish.acceleration.add(separation);
-	fish.acceleration.add(alignment);
-	fish.acceleration.add(cohesion);
+    // apply forces
+    fish.acceleration.add(separation);
+    fish.acceleration.add(alignment);
+    fish.acceleration.add(cohesion);
 
 
 };
 
-Behaviors.chase = function chase(fish,fishList, action, force) {
-	if (fishList.length === 0) {
-		return;
-	}
+Behaviors.chase = function chase(fish, fishList, action, force) {
+    if (fishList.length === 0) {
+        return;
+    }
 
-	for (var i in fishList) {
-		//this.applyForce(fishList[i].attract(this, force || 50));
-		fish.acceleration.add(Behaviors.attract(fishList[i], fish, force || 50));
-		if (fish.location.dist(fishList[i].location) < (fish.length + fishList[i].length) / 2) {
-			action(fishList[i]);
-		} // <- execute action when reaching a fish
-	}
+    for (var i in fishList) {
+        //this.applyForce(fishList[i].attract(this, force || 50));
+        fish.acceleration.add(Behaviors.attract(fishList[i], fish, force || 50));
+        if (fish.location.dist(fishList[i].location) < (fish.length + fishList[i].length) / 2) {
+            action(fishList[i]);
+        } // <- execute action when reaching a fish
+    }
 };
 
-Behaviors.follow = function (fish,target, arrive) {
-	var dest = target.copy().sub(fish.location);
-	var d = dest.dist(fish.location);
+Behaviors.follow = function(fish, target, arrive) {
+    
+    
+    var dest = target.copy().sub(fish.location);
+    var d = dest.dist(fish.location);
 
-	if (d < arrive) {
-		dest.setMag(d / arrive * fish.maxspeed);
-	}
-	else {
-		dest.setMag(fish.maxspeed);
-	}
+    if (d < arrive) {
+        dest.setMag(d / arrive * fish.maxspeed);
+    }
+    else {
+        dest.setMag(fish.maxspeed);
+    }
 
-	fish.acceleration.add(dest.limit(fish.maxforce * 2));
+    fish.acceleration.add(dest.limit(fish.maxforce * 2));
 };

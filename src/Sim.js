@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var fpsInterval = 1000 / fps;
     var delta;
     var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
+    Sim.globals.ctx = canvas.getContext("2d");
     var infoSpan = document.getElementById("info");
     var oldPOP = 0;
 
@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 oldPOP = sea.population.length;
             }
 
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, sea.width, sea.height);
-            sea.update(ctx);
+            Sim.globals.ctx.fillStyle = "#ffffff";
+            Sim.globals.ctx.fillRect(0, 0, sea.width, sea.height);
+            sea.update();
         }
     }
 
