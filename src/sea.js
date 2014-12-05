@@ -86,18 +86,7 @@ sea.updateFish = function() {
 		this.population[i].doUpdate(this);
 		this.population[i].doRender();
 
-		if (this.population[i].location.x < -50) {
-			this.population[i].location.x = -30;
-		}
-		if (this.population[i].location.x > this.width + 50) {
-			this.population[i].location.x = this.width + 30;
-		}
-		if (this.population[i].location.y < -50) {
-			this.population[i].location.y = -30;
-		}
-		if (this.population[i].location.y > this.height + 50) {
-			this.population[i].location.y = this.height + 30;
-		}
+
 		if (this.population[i].dead) {
 			this.population[i] = null;
 		}
