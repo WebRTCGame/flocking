@@ -1,7 +1,10 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global Vector:true */
+/* global Vector:true , Sim:true*/
 
 var BaseRenderable = function(x, y) {
+    if (!(this instanceof BaseRenderable)) {
+		return new BaseRenderable(x, y);
+	}
     this.location = new Vector(x, y);
     this.init();
 };
@@ -15,8 +18,11 @@ BaseRenderable.prototype = {
         }
     },
     doRender: function() {
+        
         if (!this.dead){
+        Sim.globals.ctx.save();
         this.render();
+        Sim.globals.ctx.restore();
         }
     },
     dead: false

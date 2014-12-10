@@ -4,8 +4,8 @@
 // helper library to work with vectors
 
 function Vector(x, y) {
-	this.x = x;
-	this.y = y;
+	this.x = x || 0;
+	this.y = y || 0;
 }
 
 Vector.prototype = {
@@ -15,18 +15,22 @@ Vector.prototype = {
 
 		return this;
 	},
+
+
 	add: function(v) {
 		this.x += v.x;
 		this.y += v.y;
 
 		return this;
 	},
+
 	sub: function(v) {
 		this.x -= v.x;
 		this.y -= v.y;
 
 		return this;
 	},
+
 	mul: function(s) {
 		this.x *= s;
 		this.y *= s;
@@ -34,7 +38,7 @@ Vector.prototype = {
 		return this;
 	},
 	div: function(s) {
-		!s && console.log("Division by zero!");
+		!s && console.log('Division by zero!');
 
 		this.x /= s;
 		this.y /= s;
@@ -48,6 +52,10 @@ Vector.prototype = {
 		var mag = this.mag();
 		mag && this.div(mag);
 		return this;
+	},
+	unit: function() {
+		var mag = this.mag();
+		return new Vector(this.x / mag, this.y / mag);
 	},
 	angle: function() {
 		return Math.atan2(this.y, this.x);
@@ -93,5 +101,52 @@ Vector.prototype = {
 	},
 	copy: function() {
 		return new Vector(this.x, this.y);
+	},
+	clone: function() {
+		return this.copy();
+	},
+	toString: function() {
+		return 'x: ' + this.x & ' | y: ' + this.y;
+	},
+	toArray: function() {
+		return [this.x, this.y];
+	},
+	mix: function(v, amount) {
+		if (typeof amount === 'undefined') {
+			amount = 0.5;
+		}
+		this.x = (1 - amount) * this.x + amount * v.x;
+		this.y = (1 - amount) * this.y + amount * v.y;
+		return this;
+	},
+	zero: function() {
+		this.x = this.y = 0;
+	},
+	cross: function(v) {
+		return (this.x * v.y) - (this.y * v.x);
+	},
+	projectOnto: function(vec2) {
+		var coeff = ((this.x * vec2.x) + (this.y * vec2.y)) / ((vec2.x * vec2.x) + (vec2.y * vec2.y));
+		this.x = coeff * vec2.x;
+		this.y = coeff * vec2.y;
+		return this;
+	},
+	horizontalAngle: function() {
+		return Math.atan2(this.y, this.x);
+	},
+	verticalAngle: function() {
+		return Math.atan2(this.x, this.y);
+	},
+	lengthSq: function() {
+		return this.x * this.x + this.y * this.y;
+	},
+	isEqualTo: function(v) {
+		return this.x === v.x && this.y === v.y;
+	},
+	toObject: function() {
+		return {
+			x: this.x,
+			y: this.y
+		};
 	}
 };

@@ -12,11 +12,13 @@ Sim.globals = {
         LENGTH: 20,
         FERTILITY: 0.1,
         BITE: 0.1,
-        POPULATION: 260,
+        POPULATION: 50,
         MIN_MASS: 0.5,
         MAX_MASS: 3.5,
         FOOD_RATIO: 0.2,
         SCREEN: 1.5,
         HALF_PI : Math.PI * 0.5,
         TWO_PI: Math.PI * 2
+        
     };
+    Sim.globals.initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;

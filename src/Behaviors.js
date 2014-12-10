@@ -29,7 +29,8 @@ Behaviors.seek = function(fish, target) {
     var seek = target.copy().sub(fish.location);
     seek.normalize();
     seek.mul(fish.maxspeed);
-    seek.sub(fish.velocity).limit(fish.maxforce);
+    seek.sub(fish.velocity);
+    seek.limit(fish.maxforce);
 
     return seek;
 };
@@ -159,4 +160,22 @@ Behaviors.follow = function(fish, target, arrive) {
     }
 
     fish.acceleration.add(dest.limit(fish.maxforce * 2));
+};
+
+Behaviors.bound = function boundaries(fish,sea) {
+	if (fish.location.x < 50) {
+		fish.acceleration.add(new Vector(fish.maxforce * 3, 0));
+	}
+
+	if (fish.location.x > sea.width - 50) {
+		fish.acceleration.add(new Vector(-fish.maxforce * 3, 0));
+	}
+
+	if (fish.location.y < 50) {
+		fish.acceleration.add(new Vector(0, fish.maxforce * 3));
+	}
+
+	if (fish.location.y > sea.height - 50) {
+		fish.acceleration.add(new Vector(0, -fish.maxforce * 3));
+	}
 };

@@ -4,7 +4,7 @@
 
 // Fish constructor
 function Fish(mass, x, y, hue) {
-	this.mass = mass > 0 ? mass : -mass;
+	this._mass = mass > 0 ? mass : -mass;
 	this.hue = hue || Math.random() < 0.5 ? Math.random() * 0.5 : 1 - Math.random() * 0.5;
 	this.color = utils.rgb2hex(utils.hsv2rgb(this.hue, 1, 1));
 	BaseRenderable.call(this, x, y);
@@ -29,26 +29,60 @@ Fish.prototype.init = function() {
 		configurable: true
 	});
 
+	Object.defineProperty(this, 'mass', {
+		get: function() {
+			return this._mass;
+		},
+		set: function(newValue) {
+
+			this._mass = newValue;
+			this.maxspeed = Sim.globals.MAX_SPEED * this._mass;
+			this.maxforce = Sim.globals.MAX_FORCE / (this._mass * this._mass);
+			this.separationRange = this._mass * Sim.globals.SEPARATION_RANGE;
+			this.lookRange = this._mass * Sim.globals.LOOK_RANGE;
+			this.obstacleRange = this._mass * Sim.globals.LOOK_RANGE;
+			this.smellRange = this._mass * Sim.globals.SMELL_RANGE;
+			this.length = this._mass * Sim.globals.LENGTH;
+			this.fertility = (this._mass) * Sim.globals.FERTILITY + 1;
+			this.bite = this._mass * Sim.globals.BITE;
+
+		},
+		enumerable: true,
+		configurable: true
+	});
+	//console.log(this.mass);
 	this.maxspeed = Sim.globals.MAX_SPEED * this.mass;
 	this.maxforce = Sim.globals.MAX_FORCE / (this.mass * this.mass);
 	this.separationRange = this.mass * Sim.globals.SEPARATION_RANGE;
 	this.lookRange = this.mass * Sim.globals.LOOK_RANGE;
+	this.obstacleRange = this.mass * Sim.globals.LOOK_RANGE;
 	this.smellRange = this.mass * Sim.globals.SMELL_RANGE;
 	this.length = this.mass * Sim.globals.LENGTH;
+	this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
+	this.bite = this.mass * Sim.globals.BITE;
+
+
 	this.base = this.length * 0.5;
 
-	this.velocity = new Vector(0, 0);
-	this.acceleration = new Vector(0, 0);
-	this.wandering = new Vector(0.2, 0.2);
+
 	this.skin = this.color;
 	this.age = 1;
-	this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
+
+
 	this.mature = false;
-	this.bite = this.mass * Sim.globals.BITE;
+
+
+	//neighbors
 	this.shoalList = [];
 	this.avoidList = [];
 	this.eatList = [];
 	this.mateList = [];
+
+	//movement
+	this.velocity = new Vector(0, 0);
+	this.acceleration = new Vector(0, 0);
+	this.wandering = new Vector(0.2, 0.2);
+
 };
 // fish's methods
 
@@ -57,33 +91,31 @@ Fish.prototype.isHungry = function() {
 
 	return maxEnergy * 0.8 > this.energy;
 };
-// computes all the information from the enviroment and decides in which direction swim
-Fish.prototype.swim = function(sea) {
 
-	// nearby food
-	var nearbyFood = this.look(sea.food, this.smellRange, Sim.globals.TWO_PI);
+Fish.prototype.swimForFood = function(sea) {
+	var nearbyFood = this.look(sea.food, this.smellRange);
 
-	// eat food
-	if (nearbyFood.length){
-	for (var index in nearbyFood) {
-		var food = nearbyFood[index];
-		if (food && !food.dead && food !== null && food !== undefined) {
-			// go to the food
-			
-			Behaviors.follow(this, food.location, food.radius / 10);
-			
-			// if close enough...
-			if (this.location.dist(food.location) < food.radius) {
-				// eat the food
-				food.eatenBy(this);
+
+	if (nearbyFood.length) {
+		for (var i = 0; i < nearbyFood.length; i++) {
+			var food = nearbyFood[i];
+			if (food && !food.dead && food !== null && food !== undefined) {
+				// go to the food
+
+				Behaviors.follow(this, food.location, food.radius);
+
+				// if close enough...
+				if (this.location.dist(food.location) < food.radius) {
+					// eat the food
+					food.eatenBy(this);
+				}
 			}
 		}
 	}
-}
-	//Starving
-	//if (this.energy < (this.mass * Sim.globals.ENERGY * 0.1)){return;}
 
-	var neighboors = this.look(sea.population, this.lookRange, Sim.globals.TWO_PI);
+};
+Fish.prototype.parseFishNeighbors = function(sea){
+		var neighboors = this.look(sea.population, this.lookRange);
 
 	this.shoalList = [];
 	this.avoidList = [];
@@ -110,6 +142,12 @@ Fish.prototype.swim = function(sea) {
 		}
 
 	}
+};
+
+Fish.prototype.swimForFish = function(sea) {
+
+
+this.parseFishNeighbors(sea);
 
 	if (this.shoalList.length) {
 		if (this.showBehavior) {
@@ -138,7 +176,12 @@ Fish.prototype.swim = function(sea) {
 		this.mate(sea.population);
 	}
 
-	this.boundaries(sea);
+	//this.boundaries(sea);
+};
+// computes all the information from the enviroment and decides in which direction swim
+Fish.prototype.swim = function(sea) {
+	this.swimForFood(sea);
+	this.swimForFish(sea);
 };
 
 
@@ -194,7 +237,7 @@ Fish.prototype.mate = function mate(seaPopulation) {
 		// add to sea population
 		seaPopulation.push(offspring);
 
-		seaPopulation.push(offspring);
+		//seaPopulation.push(offspring);
 
 	}, 400);
 
@@ -203,36 +246,21 @@ Fish.prototype.mate = function mate(seaPopulation) {
 	}
 };
 
-Fish.prototype.boundaries = function boundaries(sea) {
-	if (this.location.x < 50) {
-		this.acceleration.add(new Vector(this.maxforce * 3, 0));
-	}
-
-	if (this.location.x > sea.width - 50) {
-		this.acceleration.add(new Vector(-this.maxforce * 3, 0));
-	}
-
-	if (this.location.y < 50) {
-		this.acceleration.add(new Vector(0, this.maxforce * 3));
-	}
-
-	if (this.location.y > sea.height - 50) {
-		this.acceleration.add(new Vector(0, -this.maxforce * 3));
-	}
-};
-
-Fish.prototype.look = function(fishList, radius, angle) {
+Fish.prototype.look = function(fishList, radius) {
+	//var iAngle = Sim.globals.TWO_PI;
+	var iPAngle = Math.PI;
 	var neighboors = [];
 	for (var i = 0; i < fishList.length; i++) {
 		if (fishList[i] !== null && fishList[i] !== this) {
-			var diff = this.location.copy().sub(fishList[i].location);
+
 
 			var d = this.location.dist(fishList[i].location);
 
 
 			if (d < radius) {
-				var a = this.velocity.angleBetween(diff);
-				if (a < angle / 2 || a > Sim.globals.TWO_PI - angle / 2) {
+				//var diff = this.location.copy().sub(fishList[i].location);
+				var a = this.velocity.angleBetween(this.location.copy().sub(fishList[i].location));
+				if (a < iPAngle || a > iPAngle) {
 					neighboors.push(fishList[i]);
 				}
 			}
@@ -360,7 +388,7 @@ Fish.prototype.drawBehavior = function drawBehavior() {
 
 Fish.prototype.update = function() {
 	// move the fish
-	//this.swim(sea);
+
 	this.velocity.add(this.acceleration);
 	this.velocity.limit(this.maxspeed);
 	if (this.velocity.mag() < 3) {

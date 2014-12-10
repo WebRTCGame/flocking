@@ -1,10 +1,11 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global Fish:true, Food:true, Sim:true */
+/* global Fish:true, Food:true, Sim:true , Behaviors:true*/
 var sea = {
 	width: 0,
 	height: 0,
 	population: [],
-	food: []
+	food: [],
+	obstacles: []
 };
 
 sea.randomPoint = function() {
@@ -15,6 +16,7 @@ sea.randomPoint = function() {
 };
 
 sea.populateFish = function() {
+	
 	for (var i = 0; i < Sim.globals.POPULATION; i++) {
 		// random setup
 		var randomPoint = this.randomPoint();
@@ -32,8 +34,8 @@ sea.populateFish = function() {
 };
 
 sea.populateFood = function() {
-	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
-	for (var i = 0; i < initialFood; i++) {
+//	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
+	for (var i = 0; i < Sim.globals.initialFood; i++) {
 		// initial values
 		var randomPoint2 = this.randomPoint();
 
@@ -83,6 +85,7 @@ sea.updateFish = function() {
 
 
 		this.population[i].swim(this);
+		Behaviors.bound(this.population[i],this);
 		this.population[i].doUpdate(this);
 		this.population[i].doRender();
 

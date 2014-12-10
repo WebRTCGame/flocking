@@ -43,8 +43,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-    function Update() {
-        window.requestAnimationFrame(Update, canvas);
+    function RunSimulation() {
+        window.requestAnimationFrame(RunSimulation, canvas);
 
         now = Date.now();
         delta = now - then;
@@ -65,5 +65,5 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     sea.init();
-    Update();
+    RunSimulation();
 });

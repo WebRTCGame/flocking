@@ -28,9 +28,9 @@ Food.prototype.render = function() {
       Sim.globals.ctx.arc(this.location.x, this.location.y, this.radius, 0, 2 * Math.PI, false);
       Sim.globals.ctx.fillStyle = 'rgba(0,255,0,0.25)';
       Sim.globals.ctx.fill();
-      Sim.globals.ctx.lineWidth = 5;
-      Sim.globals.ctx.strokeStyle = '#003300';
-      Sim.globals.ctx.stroke();
+      //Sim.globals.ctx.lineWidth = 5;
+      //Sim.globals.ctx.strokeStyle = '#003300';
+      //Sim.globals.ctx.stroke();
 /*
 	Sim.globals.ctx.beginPath();
 	Sim.globals.ctx.arc(this.location.x, this.location.y, this.radius, 0, this.TWO_PI);
@@ -40,20 +40,25 @@ Food.prototype.render = function() {
 	Sim.globals.ctx.fillStyle = "#eeeeee";
 	Sim.globals.ctx.fill();
 	*/
+	
+	/*
 	Sim.globals.ctx.font = "14px Verdana";
 	Sim.globals.ctx.fillStyle = "#000000";
 	//Sim.globals.ctx.globalAlpha = this.energy > 0 ? 0.5 : this.radius / 100;
 	Sim.globals.ctx.fillText("FOOD", this.location.x - 20, this.location.y + 5);
 	//Sim.globals.ctx.globalAlpha = old;
+*/
+	
+	
 };
 
 // update the food
 Food.prototype.update = function(world) {
 	
 	// calculate radious according to the ammount of energy (i.e. ammount of food)
-	var target = this.energy > 0 ? this.energy + 50 : 0;
-	this.radius += (target - this.radius) / 5;
-
+	//var target = this.energy > 0 ? this.energy + 50 : 0;
+	this.radius = this.energy;//+= (target - this.radius) / 5;
+//console.log(this.radius + " e: " + this.energy);
 	// move food
 	this.location.add(this.velocity);
 
@@ -63,7 +68,7 @@ Food.prototype.update = function(world) {
 	}
 
 	// die 
-	if (this.radius < 5) {
+	if (this.energy < 5) {
 		this.dead = true;
 	}
 	
@@ -71,9 +76,14 @@ Food.prototype.update = function(world) {
 
 // get a bite by a fish
 Food.prototype.eatenBy = function(fish) {
+	
 	if (fish.energy < fish.mass * Sim.globals.ENERGY) {
 		this.energy -= fish.bite;
 		fish.energy += (fish.bite * 0.5);
 
+	} else {
+		this.energy -= fish.bite * 0.5;
+		fish.energy += (fish.bite * 0.05);
+		fish.mass += 0.001;
 	}
 };
