@@ -4,7 +4,15 @@
 		<title>Shoal - Autonomous agents + genetic algorithms in Javascript</title>
 		<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 		
+		
+		
+		<script src="threejs/three.min.js" type="application/javascript"></script>
+		<script src="threejs/ColladaLoader.js" type="application/javascript"></script>
+		<script src="threejs/TrackballControls.js" type="application/javascript"></script>
+		<script src="threejs/Detector.js" type="application/javascript"></script>
+		<script src="threejs/stats.min.js" type="application/javascript"></script>
 		<script src="src/Globals.js" type="application/javascript"></script>
+		
 		<script src="src/Utility.js" type="application/javascript"></script>
 		<script src="src/vector.js" type="application/javascript"></script>
 		<script src="src/Behaviors.js" type="application/javascript"></script>
@@ -85,7 +93,11 @@
 			-webkit-transition: opacity .5s ease;
 			cursor: default;
 		}
-
+		
+#webgl {
+	width: 300px;
+	height: 300px;
+}
 		.about #about{
 			opacity: 1;
 			
@@ -148,5 +160,10 @@
 		</div>
 		<span id="footer">click anywhere to <b>enter</b> behaviour inspector</span>
 		<canvas id="canvas"></canvas>
+		<div id="webgl"></div>
+		
+		<script>
+
+		</script>
 	</body>
 </html>

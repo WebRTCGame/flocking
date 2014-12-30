@@ -8,6 +8,7 @@ function Fish(mass, x, y, hue) {
 	this.hue = hue || Math.random() < 0.5 ? Math.random() * 0.5 : 1 - Math.random() * 0.5;
 	this.color = utils.rgb2hex(utils.hsv2rgb(this.hue, 1, 1));
 	BaseRenderable.call(this, x, y);
+
 }
 Fish.prototype = Object.create(BaseRenderable.prototype);
 
@@ -82,7 +83,18 @@ Fish.prototype.init = function() {
 	this.velocity = new Vector(0, 0);
 	this.acceleration = new Vector(0, 0);
 	this.wandering = new Vector(0.2, 0.2);
-
+	this.angle = this.velocity.angle();
+	var tint = utils.hsv2rgb(this.hue, 1, 1);
+	this.model = Sim.threeD.generateModel('rgb('+tint.r+','+tint.g+','+tint.b+')',0.02 * this.mass);
+/*
+	if (Sim.threeD.dae) {
+		this.model = Sim.threeD.dae.clone(); //undefined;//dae.clone();
+		if (Sim.threeD.scene) {
+			Sim.threeD.scene.add(this.model);
+		}
+	}
+	*/
+	
 };
 // fish's methods
 
@@ -114,8 +126,8 @@ Fish.prototype.swimForFood = function(sea) {
 	}
 
 };
-Fish.prototype.parseFishNeighbors = function(sea){
-		var neighboors = this.look(sea.population, this.lookRange);
+Fish.prototype.parseFishNeighbors = function(sea) {
+	var neighboors = this.look(sea.population, this.lookRange);
 
 	this.shoalList = [];
 	this.avoidList = [];
@@ -147,7 +159,6 @@ Fish.prototype.parseFishNeighbors = function(sea){
 Fish.prototype.swimForFish = function(sea) {
 
 
-this.parseFishNeighbors(sea);
 
 	if (this.shoalList.length) {
 		if (this.showBehavior) {
@@ -181,6 +192,7 @@ this.parseFishNeighbors(sea);
 // computes all the information from the enviroment and decides in which direction swim
 Fish.prototype.swim = function(sea) {
 	this.swimForFood(sea);
+	this.parseFishNeighbors(sea);
 	this.swimForFish(sea);
 };
 
@@ -274,7 +286,7 @@ Fish.prototype.look = function(fishList, radius) {
 Fish.prototype.draw = Fish.prototype.render = function() {
 	var ctx = Sim.globals.ctx;
 	// get the points to draw the fish
-	var angle = this.velocity.angle();
+	var angle = this.angle;
 
 	var x1 = this.location.x + Math.cos(angle) * this.base;
 	var y1 = this.location.y + Math.sin(angle) * this.base;
@@ -413,6 +425,14 @@ Fish.prototype.update = function() {
 
 	// reset acceleration
 	this.acceleration.mul(0);
+	this.angle = this.velocity.angle();
+	if(this.model){
+		//this.model.rotateOnAxis(new THREE.Vector3(0,1,0),this.angle);
+		this.model.rotation.y = this.angle;
+		this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.02 * this.mass;
+		//console.log(this.model.scale.x);
+	}
+	//console.log(this.mass);
 };
 
 Fish.showBehavior = false;

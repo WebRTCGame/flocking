@@ -2,7 +2,14 @@
 /* global $:true, Vector:true, Fish:true, Food:true */
 
 // helper library to work with vectors
+function Point(x,y){
+	this.x = x || 0;
+	this.y = y || 0;
+};
 
+Point.prototype.toVector = function(){
+	return new Vector(this.x,this.y);
+};
 function Vector(x, y) {
 	this.x = x || 0;
 	this.y = y || 0;
@@ -148,5 +155,33 @@ Vector.prototype = {
 			x: this.x,
 			y: this.y
 		};
+	},
+	perpRight: function() {
+		return new Vector(-this.y, this.x);
+	},
+	clamp: function(vMin,vMax){
+		if (this.x < vMin.x) {this.x = vMin.x} else if (this.x > vMax.x){this.x = vMax.x}
+		if (this.y < vMin.y){this.y = vMin.y}else if (this.y > vMax.y){this.y = vMax.y}
+		return this;
+	},
+	clampScalar: function(min,max){
+		if (this.x < min) {this.x = min} else if (this.x > max){this.x = max}
+		if (this.y < min){this.y = min}else if (this.y > max){this.y = max}
+		return this;
+	},
+	ceil: function(){
+		this.x = Math.ceil(this.x);
+		this.y = Math.ceil(this.y);
+		return this;
+	},
+	floor: function(){
+		this.x = Math.floor(this.x);
+		this.y = Math.floor(this.y);
+		return this;
+	},
+	negate: function(){
+		this.x = - this.x;
+		this.y = - this.y;
+		return this;
 	}
 };

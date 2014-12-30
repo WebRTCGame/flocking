@@ -16,7 +16,7 @@ sea.randomPoint = function() {
 };
 
 sea.populateFish = function() {
-	
+	console.log(Sim.threeD.dae);
 	for (var i = 0; i < Sim.globals.POPULATION; i++) {
 		// random setup
 		var randomPoint = this.randomPoint();
@@ -91,6 +91,7 @@ sea.updateFish = function() {
 
 
 		if (this.population[i].dead) {
+			Sim.threeD.scene.remove(this.population[i].model);
 			this.population[i] = null;
 		}
 
