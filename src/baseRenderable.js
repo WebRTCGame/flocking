@@ -20,9 +20,9 @@ BaseRenderable.prototype = {
     doRender: function() {
         
         if (!this.dead){
-        Sim.globals.ctx.save();
+        Sim.renderer.ctx.save();
         this.render();
-        Sim.globals.ctx.restore();
+        Sim.renderer.ctx.restore();
         }
     },
     dead: false

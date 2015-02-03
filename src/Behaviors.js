@@ -11,9 +11,6 @@ Behaviors.avoid = function(fish, dist) {
             }
         }
     }
-    if (fish.showBehavior) {
-        fish.color = 'blue';
-    }
 };
 Behaviors.wander = function(fish) {
     if (Math.random() < 0.05) {
@@ -33,6 +30,48 @@ Behaviors.seek = function(fish, target) {
     seek.limit(fish.maxforce);
 
     return seek;
+};
+Behaviors.Xseek = function(fish, target) {
+    var tar = target.copy();
+    var desiredVelocity = tar.subtract(fish.location);
+    desiredVelocity.normalize();
+    desiredVelocity.multiply(fish.maxspeed);
+
+    var steeringForce = desiredVelocity.subtract(fish.velocity);
+    steeringForce.divide(fish.mass);
+
+    fish.velocity.add(steeringForce);
+
+};
+Behaviors.Xflee = function(fish, target) {
+    var tar = target.copy();
+    var desiredVelocity = tar.subtract(fish.location);
+    desiredVelocity.normalize();
+    desiredVelocity.multiply(fish.maxspeed);
+
+    var steeringForce = desiredVelocity.subtract(fish.velocity);
+    steeringForce.divide(fish.mass);
+    steeringForce.multiply(-1);
+    fish.velocity.add(steeringForce);
+
+};
+Behaviors.Xpursue = function(fish, fishTarget) {
+    var distance = fishTarget.location.dist(fish.location);
+    var t = distance / fishTarget.maxspeed;
+    var targetLocation = fishTarget.location.clone();
+    var targetVelocity = fishTarget.velocity.clone();
+    targetVelocity.multiply(t);
+    targetLocation.add(targetVelocity);
+    Behaviors.Xseek(fish, targetLocation);
+};
+Behaviors.Xevade = function(fish, fishTarget) {
+    var distance = fishTarget.location.dist(fish.location);
+    var t = distance / fishTarget.maxspeed;
+    var targetLocation = fishTarget.location.clone();
+    var targetVelocity = fishTarget.velocity.clone();
+    targetVelocity.multiply(t);
+    targetLocation.add(targetVelocity);
+    Behaviors.Xflee(fish, targetLocation);
 };
 Behaviors.attract = function(fish, body, attractionForce) {
     var force = fish.location.copy().sub(body.location);
@@ -147,8 +186,8 @@ Behaviors.chase = function chase(fish, fishList, action, force) {
 };
 
 Behaviors.follow = function(fish, target, arrive) {
-    
-    
+
+
     var dest = target.copy().sub(fish.location);
     var d = dest.dist(fish.location);
 
@@ -162,20 +201,20 @@ Behaviors.follow = function(fish, target, arrive) {
     fish.acceleration.add(dest.limit(fish.maxforce * 2));
 };
 
-Behaviors.bound = function boundaries(fish,sea) {
-	if (fish.location.x < 50) {
-		fish.acceleration.add(new Vector(fish.maxforce * 3, 0));
-	}
+Behaviors.bound = function boundaries(fish, sea) {
+    if (fish.location.x < 50) {
+        fish.acceleration.add(new Vector(fish.maxforce * 3, 0));
+    }
 
-	if (fish.location.x > sea.width - 50) {
-		fish.acceleration.add(new Vector(-fish.maxforce * 3, 0));
-	}
+    if (fish.location.x > sea.width - 50) {
+        fish.acceleration.add(new Vector(-fish.maxforce * 3, 0));
+    }
 
-	if (fish.location.y < 50) {
-		fish.acceleration.add(new Vector(0, fish.maxforce * 3));
-	}
+    if (fish.location.y < 50) {
+        fish.acceleration.add(new Vector(0, fish.maxforce * 3));
+    }
 
-	if (fish.location.y > sea.height - 50) {
-		fish.acceleration.add(new Vector(0, -fish.maxforce * 3));
-	}
+    if (fish.location.y > sea.height - 50) {
+        fish.acceleration.add(new Vector(0, -fish.maxforce * 3));
+    }
 };

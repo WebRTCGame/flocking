@@ -16,13 +16,13 @@ Obstacle.prototype = Object.create(BaseRenderable.prototype);
 
 Obstacle.prototype.render = function() {
 
-	Sim.globals.ctx.beginPath();
-	Sim.globals.ctx.arc(this.location.x, this.location.y, this.radius, 0, 2 * Math.PI, false);
-	Sim.globals.ctx.fillStyle = 'rgba(255,255,0,0.5)';
-	Sim.globals.ctx.fill();
-	Sim.globals.ctx.lineWidth = 1;
-	Sim.globals.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-	Sim.globals.ctx.stroke();
+	Sim.renderer.ctx.beginPath();
+	Sim.renderer.ctx.arc(this.location.x, this.location.y, this.radius, 0, 2 * Math.PI, false);
+	Sim.renderer.ctx.fillStyle = 'rgba(255,255,0,0.5)';
+	Sim.renderer.ctx.fill();
+	Sim.renderer.ctx.lineWidth = 1;
+	Sim.renderer.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+	Sim.renderer.ctx.stroke();
 
 };
 

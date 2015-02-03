@@ -1,89 +1,93 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global Vector:true, Food:true, Sim:true, BaseRenderable:true */
+/* global Vector:true, Food:true, Sim:true, Boid:true, sea:true */
 
-// Food constructor
-var Food = function(x, y, amount) {
-	// food properties
-	//this.location = new Vector(x, y);
-	BaseRenderable.call(this, x, y);
+var Food = function Food(x, y, amount) {
+
+	Boid.call(this, x, y);
+	console.log("food created");
 	this.velocity = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1);
-	this.energy = amount;
-	this.radius = 5;
-	//this.dead = false;
-};
-Food.prototype = Object.create(BaseRenderable.prototype);
-
-
-// draw the food
-Food.prototype.render = function() {
-	//console.log("food render");
-	if (this.radius < 0) {
-		return;
+	this.population = amount;
+	this.food = [];
+	this.seekTarget = new Vector(x, y);
+	this.dead = false;
+	for (var i = 0; i < this.population; i++) {
+		var rX = window.utils.randomBetween(this.location.x - 30, this.location.x + 30);
+		var rY = window.utils.randomBetween(this.location.y - 30, this.location.y + 30);
+		this.food.push(new FoodBit(rX, rY));
 	}
 
-
-
-
- Sim.globals.ctx.beginPath();
-      Sim.globals.ctx.arc(this.location.x, this.location.y, this.radius, 0, 2 * Math.PI, false);
-      Sim.globals.ctx.fillStyle = 'rgba(0,255,0,0.25)';
-      Sim.globals.ctx.fill();
-      //Sim.globals.ctx.lineWidth = 5;
-      //Sim.globals.ctx.strokeStyle = '#003300';
-      //Sim.globals.ctx.stroke();
-/*
-	Sim.globals.ctx.beginPath();
-	Sim.globals.ctx.arc(this.location.x, this.location.y, this.radius, 0, this.TWO_PI);
-	Sim.globals.ctx.stroke();
-	//var old = Sim.globals.ctx.globalAlpha;
-	//Sim.globals.ctx.globalAlpha = 0.5;
-	Sim.globals.ctx.fillStyle = "#eeeeee";
-	Sim.globals.ctx.fill();
-	*/
-	
-	/*
-	Sim.globals.ctx.font = "14px Verdana";
-	Sim.globals.ctx.fillStyle = "#000000";
-	//Sim.globals.ctx.globalAlpha = this.energy > 0 ? 0.5 : this.radius / 100;
-	Sim.globals.ctx.fillText("FOOD", this.location.x - 20, this.location.y + 5);
-	//Sim.globals.ctx.globalAlpha = old;
-*/
-	
-	
 };
+Food.prototype = Object.create(Boid.prototype);
 
-// update the food
-Food.prototype.update = function(world) {
-	
-	// calculate radious according to the ammount of energy (i.e. ammount of food)
-	//var target = this.energy > 0 ? this.energy + 50 : 0;
-	this.radius = this.energy;//+= (target - this.radius) / 5;
-//console.log(this.radius + " e: " + this.energy);
-	// move food
-	this.location.add(this.velocity);
-
-	// if food goes out of the boundaries of the sea, kill it
-	if (this.location.x > world.width || this.location.x < 0 || this.location.y > world.height || this.location.y < 0) {
-		this.energy = 0;
+Food.prototype.render = function render() {
+	Sim.renderer.ctx.beginPath();
+	Sim.renderer.ctx.arc(this.location.x, this.location.y, (this.food.length + 1) / 4, 0, 2 * Math.PI, false);
+	Sim.renderer.ctx.fillStyle = 'rgba(0,0,255,0.25)';
+	Sim.renderer.ctx.fill();
+	for (var i = 0; i < this.food.length; i++) {
+		this.food[i].doRender();
+	}
+};
+Food.prototype.preUpdate = function preUpdate() {
+	var loc = this.location.clone();
+	for (var i = 0; i < this.food.length; i++) {
+		var seekval = Behaviors.seek(this.food[i], loc);
+		this.food[i].acceleration.add(seekval);
 	}
 
-	// die 
-	if (this.energy < 5) {
-		this.dead = true;
-	}
-	
 };
 
-// get a bite by a fish
-Food.prototype.eatenBy = function(fish) {
-	
+Food.prototype.postUpdate = function postUpdate(world) {
+	for (var i = 0; i < this.food.length; i++) {
+		this.food[i].doUpdate();
+	}
+	if (this.location.x < -5) {
+		this.location.x = sea.width - 5;
+	}
+	if (this.location.x > sea.width + 5) {
+		this.location.x = 5;
+	}
+	if (this.location.y < -5) {
+		this.location.y = sea.height - 5;
+	}
+	if (this.location.y > sea.height + 5) {
+		this.location.y = 5;
+	}
+
+};
+
+Food.prototype.eatenBy = function eatenBy(fish) {
+
+	this.food.pop();
+
 	if (fish.energy < fish.mass * Sim.globals.ENERGY) {
-		this.energy -= fish.bite;
+
 		fish.energy += (fish.bite * 0.5);
 
-	} else {
-		this.energy -= fish.bite * 0.5;
+	}
+	else {
+
+
 		fish.energy += (fish.bite * 0.05);
 		fish.mass += 0.001;
 	}
+	if (this.food.length <= 0) {
+		this.dead = true;
+	}
 };
+
+
+var FoodBit = function FoodBit(x, y) {
+	Boid.call(this, x, y);
+};
+FoodBit.prototype = Object.create(Boid.prototype);
+
+FoodBit.prototype.render = function() {
+
+	Sim.renderer.ctx.beginPath();
+	Sim.renderer.ctx.arc(this.location.x, this.location.y, 5, 0, 2 * Math.PI, false);
+	Sim.renderer.ctx.fillStyle = 'rgba(0,255,0,0.25)';
+	Sim.renderer.ctx.fill();
+
+};
+

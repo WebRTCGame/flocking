@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <script src="src/Utility.js" type="application/javascript"></script>
+    <script src="src/vector.js" type="application/javascript"></script>
+</head>
+
+<body>
+    <canvas id="canvas1" width="500" height="500"></canvas>
+    <script>
+        var can = document.getElementById('canvas1');
+        var ctx = can.getContext('2d');
+
+        var cx = can.width * 0.5;
+        var cy = can.height * 0.5;
+        var mousePos = {
+            x: cx,
+            y: cy
+        };
+
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+                y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+            };
+        }
+
+
+        can.addEventListener('mousemove', function(evt) {
+            mousePos = getMousePos(can, evt);
+        }, false);
+
+        function drawText(x, y, text) {
+            ctx.save();
+            ctx.font = "16px Arial";
+            ctx.lineWidth = 4;
+            ctx.fillStyle = 'rgba(0,0,0,1)';
+            ctx.strokeStyle = 'rgba(255,255,255,1)';
+            ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
+            ctx.restore();
+        };
+
+        function drawCircle(x, y, radius, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fill();
+        };
+
+        function Fish() {
+            this.mass = 2;
+            this.position = new Vector(100, 100);
+            this.velocity = new Vector(1, 0);
+            this.maxForce = 2;
+            this.maxSpeed = 2;
+            this.rotation = 0;
+            this.base = 3.5;
+            this.length = 12;
+        };
+        Fish.prototype.update = function() {
+            this.velocity.truncate(this.maxSpeed);
+            this.position.add(this.velocity);
+            this.rotation = this.velocity.angle();
+        };
+        Fish.prototype.draw = function() {
+            //drawCircle(this.position.x, this.position.y, 5, 'blue');
+
+
+            //var ctx = Sim.globals.ctx;
+            // get the points to draw the fish
+            var angle = this.rotation;
+
+            var x1 = this.position.x + Math.cos(angle) * this.base;
+            var y1 = this.position.y + Math.sin(angle) * this.base;
+
+            var x = this.position.x - Math.cos(angle) * this.length;
+            var y = this.position.y - Math.sin(angle) * this.length;
+
+            var x2 = this.position.x + Math.cos(angle + Math.PI * 0.5) * this.base;
+            var y2 = this.position.y + Math.sin(angle + Math.PI * 0.5) * this.base;
+
+            var x3 = this.position.x + Math.cos(angle - Math.PI * 0.5) * this.base;
+            var y3 = this.position.y + Math.sin(angle - Math.PI * 0.5) * this.base;
+
+
+
+            // draw the fish on the canvas
+            ctx.lineWidth = 1;
+            this.color = 'blue'; //this.skin;
+            ctx.fillStyle = this.color;
+            //ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x3, y3);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x2, y2);
+            ctx.closePath();
+
+
+            //ctx.quadraticCurveTo(x2, y2, x, y);
+            //ctx.quadraticCurveTo(x3, y3, x1, y1);
+            //ctx.stroke();
+            ctx.fill();
+            ctx.stroke();
+        };
+        
+        
+        Fish.prototype.Xseek = function(fish, target) {
+            //fish.position.x = 100;
+            //fish.position.y = 100;
+
+            var tar = target.copy();
+
+            var desiredVelocity = tar.sub(fish.position);
+            console.log(JSON.stringify(desiredVelocity));
+            desiredVelocity.normalize();
+            desiredVelocity.mul(fish.maxspeed);
+
+            var steeringForce = desiredVelocity.sub(fish.velocity);
+            steeringForce.div(fish.mass);
+
+            fish.velocity.add(steeringForce);
+
+        };
+
+        var fps = 30;
+        var now;
+        var then = Date.now();
+        var interval = 1000 / fps;
+        var delta;
+        var csDir = 0;
+        var anitest = 0;
+
+        var fish = new Fish();
+
+        function draw() {
+
+            requestAnimationFrame(draw);
+
+            now = Date.now();
+            delta = now - then;
+
+            if (delta > interval) {
+                then = now - (delta % interval);
+
+                ctx.clearRect(0, 0, can.width, can.height);
+
+                frame();
+            }
+        }
+
+        function frame() {
+            drawText(20, 20, JSON.stringify(mousePos));
+            drawText(20, 40, JSON.stringify(fish.position));
+
+            ctx.setLineDash([4, 4]);
+
+            anitest += 1;
+            ctx.beginPath();
+            ctx.moveTo(anitest, 0);
+            ctx.lineTo(can.width, 0);
+            ctx.lineTo(can.width, can.height);
+            ctx.lineTo(0, can.height);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(fish.position.x, fish.position.y);
+            ctx.lineTo(can.width, 0);
+            ctx.stroke();
+            
+            
+            
+            var V = new Vector(mousePos.x, mousePos.y || 300);
+            //fish.Xseek(fish,V);
+            var vec = V.clone();
+            vec = V.sub(fish.position);
+            vec.normalize();
+            vec.multiply(fish.maxSpeed);
+            var steering = vec.sub(fish.velocity);
+            steering.truncate(fish.maxForce);
+            steering.div(fish.mass);
+
+
+            fish.velocity = vec.add(steering);
+
+            fish.update();
+            fish.draw();
+            console.log(fish.position.x + " : " + fish.position.y);
+        };
+        draw();
+    </script>
+
+</body>
+
+</html>

@@ -1,12 +1,6 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global Fish:true, Food:true, Sim:true , Behaviors:true*/
-var sea = {
-	width: 0,
-	height: 0,
-	population: [],
-	food: [],
-	obstacles: []
-};
+/* global Fish:true, Food:true, Sim:true ,  sea:true*/
+
 
 sea.randomPoint = function() {
 	return {
@@ -16,25 +10,24 @@ sea.randomPoint = function() {
 };
 
 sea.populateFish = function() {
-	console.log(Sim.threeD.dae);
+	//console.log(Sim.threeD.dae);
 	for (var i = 0; i < Sim.globals.POPULATION; i++) {
-		// random setup
+
 		var randomPoint = this.randomPoint();
-		//var randomX = Math.random() * sea.width;
-		//var randomY = Math.random() * sea.height;
+
 		var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
 		var randomMass = Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
 
-		// create fish
+
 		var fish = new Fish(randomMass, randomPoint.x, randomPoint.y);
 
-		// add fish to the sea population
+
 		this.population.push(fish);
 	}
 };
 
 sea.populateFood = function() {
-//	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
+	//	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
 	for (var i = 0; i < Sim.globals.initialFood; i++) {
 		// initial values
 		var randomPoint2 = this.randomPoint();
@@ -43,19 +36,19 @@ sea.populateFood = function() {
 
 		// create food
 		var food = new Food(randomPoint2.x, randomPoint2.y, foodAmmount);
-		
+
 		this.food.push(food);
-		
+
 	}
-	
+
 };
 sea.updateFood = function() {
-	
+
 	for (var i = 0; i < this.food.length; i++) {
 		var food = this.food[i];
 
 		if (food && !food.dead && food !== null) {
-			
+
 
 			food.doUpdate(sea);
 			food.doRender();
@@ -75,26 +68,18 @@ sea.updateFood = function() {
 
 sea.updateFish = function() {
 	function isNotDead(element) {
-			//var isDead = element === null || element.dead;
-			return element !== null;
-		}
-		
+		//var isDead = element === null || element.dead;
+		return element !== null;
+	}
+
 	this.population = this.population.filter(isNotDead);
-
-	for (var i in this.population) {
-
-
+	for (var i = 0; i < this.population.length; i++) {
 		this.population[i].swim(this);
-		Behaviors.bound(this.population[i],this);
 		this.population[i].doUpdate(this);
 		this.population[i].doRender();
-
-
 		if (this.population[i].dead) {
-			Sim.threeD.scene.remove(this.population[i].model);
 			this.population[i] = null;
 		}
-
 	}
 
 };

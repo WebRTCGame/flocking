@@ -212,129 +212,201 @@ window.utils.intersects = function(rectA, rectB) {
 };
 
 window.utils.interpolateColor = function(colorA, colorB) {
-	var interpolation = -1,
-		difference = Math.abs(colorA - colorB);
+    var interpolation = -1,
+        difference = Math.abs(colorA - colorB);
 
-	if (difference > 0.5) {
-		interpolation = (colorA > colorB ? colorA : colorB) + (1 - difference) / 2;
+    if (difference > 0.5) {
+        interpolation = (colorA > colorB ? colorA : colorB) + (1 - difference) / 2;
 
-		if (interpolation > 1) {
-			interpolation -= 1;
-		}
+        if (interpolation > 1) {
+            interpolation -= 1;
+        }
 
-	}
-	else {
-		interpolation = (colorA + colorB) / 2;
-	}
+    }
+    else {
+        interpolation = (colorA + colorB) / 2;
+    }
 
-	return interpolation;
+    return interpolation;
 };
 
 window.utils.rgb2hex = function(rgb) {
-	rgb.r |= 0;
-	rgb.g |= 0;
-	rgb.b |= 0;
+    rgb.r |= 0;
+    rgb.g |= 0;
+    rgb.b |= 0;
 
-	var r = rgb.r.toString(16);
-	var g = rgb.g.toString(16);
-	var b = rgb.b.toString(16);
+    var r = rgb.r.toString(16);
+    var g = rgb.g.toString(16);
+    var b = rgb.b.toString(16);
 
-	r = r.length === 1 ? "0" + r : r;
-	g = g.length === 1 ? "0" + g : g;
-	b = b.length === 1 ? "0" + b : b;
+    r = r.length === 1 ? "0" + r : r;
+    g = g.length === 1 ? "0" + g : g;
+    b = b.length === 1 ? "0" + b : b;
 
-	return "#" + r.substr(0, 2) + g.substr(0, 2) + b.substr(0, 2);
+    return "#" + r.substr(0, 2) + g.substr(0, 2) + b.substr(0, 2);
 };
 
 window.utils.hsv2rgb = function(h, s, v) {
-	var r, g, b, i, f, p, q, t;
-	if (h && s === undefined && v === undefined) {
-		s = h.s, v = h.v, h = h.h;
-	}
-	i = Math.floor(h * 6);
-	f = h * 6 - i;
-	p = v * (1 - s);
-	q = v * (1 - f * s);
-	t = v * (1 - (1 - f) * s);
-	switch (i % 6) {
-		case 0:
-			r = v, g = t, b = p;
-			break;
-		case 1:
-			r = q, g = v, b = p;
-			break;
-		case 2:
-			r = p, g = v, b = t;
-			break;
-		case 3:
-			r = p, g = q, b = v;
-			break;
-		case 4:
-			r = t, g = p, b = v;
-			break;
-		case 5:
-			r = v, g = p, b = q;
-			break;
-	}
-	return {
-		r: Math.floor(r * 255),
-		g: Math.floor(g * 255),
-		b: Math.floor(b * 255)
-	};
+    var r, g, b, i, f, p, q, t;
+    if (h && s === undefined && v === undefined) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0:
+            r = v, g = t, b = p;
+            break;
+        case 1:
+            r = q, g = v, b = p;
+            break;
+        case 2:
+            r = p, g = v, b = t;
+            break;
+        case 3:
+            r = p, g = q, b = v;
+            break;
+        case 4:
+            r = t, g = p, b = v;
+            break;
+        case 5:
+            r = v, g = p, b = q;
+            break;
+    }
+    return {
+        r: Math.floor(r * 255),
+        g: Math.floor(g * 255),
+        b: Math.floor(b * 255)
+    };
 };
 
 window.utils.hex2rgb = function(h) {
-	var hex = h.toString().substr(1);
-	var r = parseInt(hex[0] + hex[1], 16);
-	var g = parseInt(hex[2] + hex[3], 16);
-	var b = parseInt(hex[4] + hex[5], 16);
+    var hex = h.toString().substr(1);
+    var r = parseInt(hex[0] + hex[1], 16);
+    var g = parseInt(hex[2] + hex[3], 16);
+    var b = parseInt(hex[4] + hex[5], 16);
 
-	return {
-		r: r,
-		g: g,
-		b: b
-	};
+    return {
+        r: r,
+        g: g,
+        b: b
+    };
 };
 
 
 window.utils.hue2hex = function(hue) {
-	var rgb = utils.hsv2rgb(hue, 1, 1);
-	var hex = utils.rgb2hex(rgb);
-	return hex;
+    var rgb = utils.hsv2rgb(hue, 1, 1);
+    var hex = utils.rgb2hex(rgb);
+    return hex;
 };
 
 if (!Array.prototype.filter) {
-  Array.prototype.filter = function(fun/*, thisArg*/) {
-    'use strict';
+    Array.prototype.filter = function(fun /*, thisArg*/ ) {
+        'use strict';
 
-    if (this === void 0 || this === null) {
-      throw new TypeError();
-    }
-
-    var t = Object(this);
-    var len = t.length >>> 0;
-    if (typeof fun !== 'function') {
-      throw new TypeError();
-    }
-
-    var res = [];
-    var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
-    for (var i = 0; i < len; i++) {
-      if (i in t) {
-        var val = t[i];
-
-        // NOTE: Technically this should Object.defineProperty at
-        //       the next index, as push can be affected by
-        //       properties on Object.prototype and Array.prototype.
-        //       But that method's new, and collisions should be
-        //       rare, so use the more-compatible alternative.
-        if (fun.call(thisArg, val, i, t)) {
-          res.push(val);
+        if (this === void 0 || this === null) {
+            throw new TypeError();
         }
-      }
-    }
 
-    return res;
-  };
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (typeof fun !== 'function') {
+            throw new TypeError();
+        }
+
+        var res = [];
+        var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+        for (var i = 0; i < len; i++) {
+            if (i in t) {
+                var val = t[i];
+
+                // NOTE: Technically this should Object.defineProperty at
+                //       the next index, as push can be affected by
+                //       properties on Object.prototype and Array.prototype.
+                //       But that method's new, and collisions should be
+                //       rare, so use the more-compatible alternative.
+                if (fun.call(thisArg, val, i, t)) {
+                    res.push(val);
+                }
+            }
+        }
+
+        return res;
+    };
 }
 
+var PI2 = Math.PI * 2;
+
+function ptInTriangle(p, p0, p1, p2) {
+    var A = 1 / 2 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
+    var sign = A < 0 ? -1 : 1;
+    var s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
+    var t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y) * sign;
+
+    return s > 0 && t > 0 && (s + t) < 2 * A * sign;
+}
+
+function toRadians(deg) {
+    return deg * Math.PI / 180;
+};
+
+
+// Converts from radians to degrees.
+function toDegrees(radians) {
+    return radians * 180 / Math.PI;
+};
+
+function midpoint(x1, y1, x2, y2) {
+    return {
+        x: (x1 + x2) / 2,
+        y: (y1 + y2) / 2
+    };
+};
+
+function pointAngle(x1, y1, x2, y2) {
+    //var tempX = x2 - x1;
+    //var tempY = y2 - y1;
+
+    return wrap2P(Math.atan2(y2 - y1, x2 - x1));
+
+    //return theta; //theta * 180 / Math.PI;
+};
+
+function point(x, y) {
+    return {
+        x: x,
+        y: y
+    };
+};
+
+function distance(x1, y1, x2, y2) {
+    return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
+};
+
+function near(x1, y1, x2, y2, length) {
+    return distance(x1, y1, x2, y2) <= length;
+};
+
+function getPointAL(x, y, angle, length) {
+    var radA = toRadians(angle);
+    return {
+        x: x + length * Math.cos(radA),
+        y: y + length * Math.sin(radA)
+    };
+};
+
+function wrap2P(b) {
+    0 > b && (b += PI2);
+    b > PI2 && (b -= PI2);
+    return b;
+}
+
+function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};
+window.utils.randomBetween = function (min, max) {
+    return Math.random() * (max - min + 1) + min;
+};

@@ -8,51 +8,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var container, stats;
 
-    //var renderer;
-    //var particleLight;
 
-    //var controls;
-    //var orbitControls = null;
-    //var dae;
-    //var loader = new THREE.JSONLoader();
     Sim.threeD.JSONLoader.load(Sim.threeD.jsModel, function(geometry, materials) {
 
         Sim.threeD.baseMaterials = materials;
         Sim.threeD.geometry = geometry;
 
-        init();
+        if (do3D) {
+            init();
+        }
+
         sea.init();
         RunSimulation();
-        animate();
-
-    });
-
-
-/*
-    var loader = new THREE.ColladaLoader();
-    loader.options.convertUpAxis = true;
-    loader.load(Sim.threeD.daeModel, function(collada) {
-
-        Sim.threeD.dae = collada.scene;
-
-        Sim.threeD.dae.traverse(function(child) {
-
-            if (child instanceof THREE.SkinnedMesh) {
-
-                var animation = new THREE.Animation(child, child.geometry.animation);
-                animation.play();
-
-            }
-
-        });
-
-        //Sim.threeD.dae.scale.x = Sim.threeD.dae.scale.y = Sim.threeD.dae.scale.z = 0.002;
-        Sim.threeD.dae.updateMatrix();
-
 
 
     });
-*/
+
     function init() {
 
         container = document.getElementById("webgl"); //document.createElement( 'div' );
@@ -137,113 +108,64 @@ document.addEventListener("DOMContentLoaded", function() {
 
     //
 
-    function animate() {
 
-        requestAnimationFrame(animate);
-        //orbitControls.update();
-        Sim.threeD.controls.update();
-        render();
-        stats.update();
-
-    }
 
     var clock = new THREE.Clock();
 
     function render() {
 
         var timer = Date.now() * 0.0005;
-var delta = clock.getDelta();
-        //camera.position.x = Math.cos( timer ) * 10;
-        //camera.position.y = 2;
-        //camera.position.z = Math.sin( timer ) * 10;
+        var delta = clock.getDelta();
 
-        //camera.lookAt( scene.position );
 
         Sim.threeD.particleLight.position.x = Math.sin(timer * 4) * 3009;
         Sim.threeD.particleLight.position.y = Math.cos(timer * 5) * 4000;
         Sim.threeD.particleLight.position.z = Math.cos(timer * 4) * 3009;
-        //dae.position.x = 5;
-        //var sceneScale = 0.5;
+
         if (sea) {
             for (var i = 0; i < Sim.globals.POPULATION; i++) {
                 if (sea.population[i].model) {
                     sea.population[i].model.position.x = sea.population[i].location.x;
                     sea.population[i].model.position.z = sea.population[i].location.y;
-                    sea.population[i].model.updateAnimation( 1000 * delta );
+                    sea.population[i].model.updateAnimation(1000 * delta);
                     sea.population[i].model.updateMatrix();
                 }
             }
 
         }
         THREE.AnimationHandler.update(delta);
-
         Sim.threeD.renderer.render(Sim.threeD.scene, Sim.threeD.camera);
 
     }
 
-    var fps = 30;
-    var now;
-    var then = Date.now();
-    var fpsInterval = 1000 / fps;
-    var delta;
-    var canvas = document.getElementById("canvas");
-    Sim.globals.ctx = canvas.getContext("2d");
-    var infoSpan = document.getElementById("info");
-    var oldPOP = 0;
-    canvas.height = 300;
-    canvas.width = 300;
-    sea.height = 300;
-    sea.width = 300;
 
-    window.addEventListener("mouseup", function() {
+    
+    Sim.renderer.init(document.getElementById("canvas"),800,800);
+     //canvas filters: https://developer.mozilla.org/en-US/docs/Web/CSS/filter
+    sea.height = 800;
+    sea.width = 800;
 
-        Fish.showBehavior = !Fish.showBehavior;
-        // $("body").removeClass("about");
-
-        document.getElementById("footer").innerHTML = "click anywhere to <b>" + (Fish.showBehavior ? "quit" : "enter") + "</b> behaviour inspector";
-    });
-
-    document.getElementById("about-button").addEventListener("click", function() {
-        //$("body").addClass("about");
-        //$("#footer").html("click anywhere to <b>go back</b>");
-        document.getElementById("footer").innerHTML = "click anywhere to <b>go back</b>";
-    });
-    /*
-        var resizeFunc = (function() {
-            // resize sea
-            sea.width = window.innerWidth;
-            sea.height = window.innerHeight;
-
-            // resize canvas element
-            var e = document.getElementById("canvas");
-            e.setAttribute("width", sea.width);
-            e.setAttribute("height", sea.height);
-        })();
-
-        window.addEventListener("resize", resizeFunc, false);
-    */
-
-
+   
     function RunSimulation() {
-        window.requestAnimationFrame(RunSimulation, canvas);
-
-        now = Date.now();
-        delta = now - then;
-        if (delta > fpsInterval) {
+        window.requestAnimationFrame(RunSimulation, Sim.renderer.canvas);
 
 
-            then = now - (delta % fpsInterval);
-
-            if (sea.population.length !== oldPOP) {
-                infoSpan.innerHTML = "Population: " + sea.population.length;
-                oldPOP = sea.population.length;
-            }
-
-            Sim.globals.ctx.fillStyle = "#ffffff";
-            Sim.globals.ctx.fillRect(0, 0, sea.width, sea.height);
-            sea.update();
-        }
+        Sim.renderer.run(frame);
     }
 
 
+
+    function frame() {
+      
+        
+        Sim.renderer.ctx.clearRect(0, 0, sea.width, sea.height);
+        
+        sea.update();
+
+        if (do3D) {
+            Sim.threeD.controls.update();
+            render();
+            stats.update();
+        }
+    }
 });

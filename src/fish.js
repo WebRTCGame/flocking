@@ -4,17 +4,19 @@
 
 // Fish constructor
 function Fish(mass, x, y, hue) {
-	this._mass = mass > 0 ? mass : -mass;
+	BaseRenderable.call(this, x, y);
+	console.log("param mass: " + mass);
+	this._mass = mass; //mass > 0 ? mass : -mass;
 	this.hue = hue || Math.random() < 0.5 ? Math.random() * 0.5 : 1 - Math.random() * 0.5;
 	this.color = utils.rgb2hex(utils.hsv2rgb(this.hue, 1, 1));
-	BaseRenderable.call(this, x, y);
 
-}
-Fish.prototype = Object.create(BaseRenderable.prototype);
 
-Fish.prototype.init = function() {
 
-	this._energy = this.mass * Sim.globals.ENERGY;
+	var self = this;
+	//this._energy = this.mass * Sim.globals.ENERGY;
+	this.energy = this._mass * Sim.globals.ENERGY;
+
+	/*
 	Object.defineProperty(this, 'energy', {
 		get: function() {
 			return this._energy;
@@ -29,7 +31,7 @@ Fish.prototype.init = function() {
 		enumerable: true,
 		configurable: true
 	});
-
+*/
 	Object.defineProperty(this, 'mass', {
 		get: function() {
 			return this._mass;
@@ -37,21 +39,24 @@ Fish.prototype.init = function() {
 		set: function(newValue) {
 
 			this._mass = newValue;
-			this.maxspeed = Sim.globals.MAX_SPEED * this._mass;
-			this.maxforce = Sim.globals.MAX_FORCE / (this._mass * this._mass);
-			this.separationRange = this._mass * Sim.globals.SEPARATION_RANGE;
-			this.lookRange = this._mass * Sim.globals.LOOK_RANGE;
-			this.obstacleRange = this._mass * Sim.globals.LOOK_RANGE;
-			this.smellRange = this._mass * Sim.globals.SMELL_RANGE;
-			this.length = this._mass * Sim.globals.LENGTH;
-			this.fertility = (this._mass) * Sim.globals.FERTILITY + 1;
-			this.bite = this._mass * Sim.globals.BITE;
+			this.maxspeed = Sim.globals.MAX_SPEED * this.mass;
+			this.maxforce = Sim.globals.MAX_FORCE / (this.mass * this.mass);
+			this.separationRange = this.mass * Sim.globals.SEPARATION_RANGE;
+			this.lookRange = this.mass * Sim.globals.LOOK_RANGE;
+			this.obstacleRange = this.mass * Sim.globals.LOOK_RANGE;
+			this.smellRange = this.mass * Sim.globals.SMELL_RANGE;
+			this.length = this.mass * Sim.globals.LENGTH;
+			this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
+			this.bite = this.mass * Sim.globals.BITE;
+
 
 		},
 		enumerable: true,
 		configurable: true
 	});
-	//console.log(this.mass);
+
+
+
 	this.maxspeed = Sim.globals.MAX_SPEED * this.mass;
 	this.maxforce = Sim.globals.MAX_FORCE / (this.mass * this.mass);
 	this.separationRange = this.mass * Sim.globals.SEPARATION_RANGE;
@@ -61,10 +66,9 @@ Fish.prototype.init = function() {
 	this.length = this.mass * Sim.globals.LENGTH;
 	this.fertility = (this.mass) * Sim.globals.FERTILITY + 1;
 	this.bite = this.mass * Sim.globals.BITE;
-
-
 	this.base = this.length * 0.5;
 
+	this.tail = [];
 
 	this.skin = this.color;
 	this.age = 1;
@@ -72,7 +76,8 @@ Fish.prototype.init = function() {
 
 	this.mature = false;
 
-
+	this.vision = new CircleSegment(this.x, this.y, this.lookRange, toRadians(240), 0);
+	this.nose = new CircleSegment(this.x, this.y, this.smellRange, toRadians(300), 0);
 	//neighbors
 	this.shoalList = [];
 	this.avoidList = [];
@@ -82,19 +87,26 @@ Fish.prototype.init = function() {
 	//movement
 	this.velocity = new Vector(0, 0);
 	this.acceleration = new Vector(0, 0);
+	this.accelDraw = new Vector(0, 0);
 	this.wandering = new Vector(0.2, 0.2);
 	this.angle = this.velocity.angle();
 	var tint = utils.hsv2rgb(this.hue, 1, 1);
-	this.model = Sim.threeD.generateModel('rgb('+tint.r+','+tint.g+','+tint.b+')',0.02 * this.mass);
-/*
-	if (Sim.threeD.dae) {
-		this.model = Sim.threeD.dae.clone(); //undefined;//dae.clone();
-		if (Sim.threeD.scene) {
-			Sim.threeD.scene.add(this.model);
+	this.model = Sim.threeD.generateModel('rgb(' + tint.r + ',' + tint.g + ',' + tint.b + ')', 0.02 * this.mass);
+	/*
+		if (Sim.threeD.dae) {
+			this.model = Sim.threeD.dae.clone(); //undefined;//dae.clone();
+			if (Sim.threeD.scene) {
+				Sim.threeD.scene.add(this.model);
+			}
 		}
-	}
-	*/
-	
+		*/
+	//console.log("Start mass: " + this.mass);
+	//console.log("Start energy: " + this.energy);
+}
+Fish.prototype = Object.create(BaseRenderable.prototype);
+
+Fish.prototype.init = function() {
+
 };
 // fish's methods
 
@@ -105,7 +117,7 @@ Fish.prototype.isHungry = function() {
 };
 
 Fish.prototype.swimForFood = function(sea) {
-	var nearbyFood = this.look(sea.food, this.smellRange);
+	var nearbyFood = this.identifyFood();
 
 
 	if (nearbyFood.length) {
@@ -127,13 +139,14 @@ Fish.prototype.swimForFood = function(sea) {
 
 };
 Fish.prototype.parseFishNeighbors = function(sea) {
-	var neighboors = this.look(sea.population, this.lookRange);
+	var neighboors = this.identifyFish();
 
 	this.shoalList = [];
 	this.avoidList = [];
 	this.eatList = [];
 	this.mateList = [];
 
+	//mass based parsing
 	for (var i = 0; i < neighboors.length; i++) {
 		var other = neighboors[i];
 		if (other !== this) {
@@ -145,11 +158,13 @@ Fish.prototype.parseFishNeighbors = function(sea) {
 			}
 			else {
 				this.shoalList.push(other);
-			}
-		}
-		if (this.mature) {
-			if (other.mature) {
-				this.mateList.push(other);
+
+				//is shoalable and mature
+				if (this.mature) {
+					if (other.mature) {
+						this.mateList.push(other);
+					}
+				}
 			}
 		}
 
@@ -158,19 +173,13 @@ Fish.prototype.parseFishNeighbors = function(sea) {
 
 Fish.prototype.swimForFish = function(sea) {
 
-
-
 	if (this.shoalList.length) {
-		if (this.showBehavior) {
-			this.color = 'black';
-		}
-		Behaviors.shoal(this);
 
+		Behaviors.shoal(this);
 	}
 	else {
 		Behaviors.wander(this);
 	}
-
 
 	if (this.avoidList.length) {
 		Behaviors.avoid(this, 300);
@@ -187,9 +196,10 @@ Fish.prototype.swimForFish = function(sea) {
 		this.mate(sea.population);
 	}
 
-	//this.boundaries(sea);
+
 };
-// computes all the information from the enviroment and decides in which direction swim
+
+
 Fish.prototype.swim = function(sea) {
 	this.swimForFood(sea);
 	this.parseFishNeighbors(sea);
@@ -198,7 +208,7 @@ Fish.prototype.swim = function(sea) {
 
 
 
-// makes the fish chase another group of fishes, and eat them when reaching
+
 Fish.prototype.eat = function eat() {
 
 
@@ -212,11 +222,8 @@ Fish.prototype.eat = function eat() {
 		fish.energy = 0;
 	});
 
-	if (Fish.showBehavior) {
-		this.color = "red";
-	}
-};
 
+};
 
 Fish.prototype.mate = function mate(seaPopulation) {
 	//this.mateList = fishList;
@@ -247,21 +254,20 @@ Fish.prototype.mate = function mate(seaPopulation) {
 		var offspring = new Fish(mass, location.x, location.y, color);
 
 		// add to sea population
-		seaPopulation.push(offspring);
+		//sea.population.push(offspring);
 
-		//seaPopulation.push(offspring);
+
+		seaPopulation.push(offspring);
 
 	}, 400);
 
-	if (Fish.showBehavior) {
-		this.color = "pink";
-	}
-};
 
-Fish.prototype.look = function(fishList, radius) {
-	//var iAngle = Sim.globals.TWO_PI;
+};
+Fish.prototype.identifyFood = function() { //var iAngle = Sim.globals.TWO_PI;
+	/*
 	var iPAngle = Math.PI;
 	var neighboors = [];
+
 	for (var i = 0; i < fishList.length; i++) {
 		if (fishList[i] !== null && fishList[i] !== this) {
 
@@ -280,61 +286,161 @@ Fish.prototype.look = function(fishList, radius) {
 	}
 
 	return neighboors;
+	*/
+	var neighboors = [];
+	var fishList = sea.food;
+
+	for (var i = 0; i < fishList.length; i++) {
+		if (fishList[i] !== null) {
+			if (fishList[i] !== undefined) {
+				if (fishList[i] !== this) {
+					if (this.nose.contains(fishList[i].location.x, fishList[i].location.y)) {
+						neighboors.push(fishList[i]);
+					}
+				}
+			}
+		}
+	}
+	return neighboors;
+};
+Fish.prototype.identifyFish = function() {
+
+
+	for (var retVal = [],fishList = sea.population, i = 0; i < fishList.length; i++) {
+		if (fishList[i] !== null && fishList[i] !== undefined && fishList[i] !== this) {
+			if (this.vision.contains(fishList[i].location.x, fishList[i].location.y)) {
+				retVal.push(fishList[i]);
+			}
+		}
+	}
+	return retVal;
 };
 
+Fish.prototype.isInSea = function() {
+	return (this.location.x > 0 && this.location.x < sea.width && this.location.y > 0 && this.location.y < sea.height);
+};
 
-Fish.prototype.draw = Fish.prototype.render = function() {
-	var ctx = Sim.globals.ctx;
-	// get the points to draw the fish
-	var angle = this.angle;
+Fish.prototype.render = function() {
+	if (this.isInSea()) {
+		var ctx = Sim.renderer.ctx;
+		ctx.save();
+		ctx.lineWidth = 1;
+		// get the points to draw the fish
+		var angle = this.angle;
+		this.base = this.length * 0.5;
 
-	var x1 = this.location.x + Math.cos(angle) * this.base;
-	var y1 = this.location.y + Math.sin(angle) * this.base;
 
-	var x = this.location.x - Math.cos(angle) * this.length;
-	var y = this.location.y - Math.sin(angle) * this.length;
+		var x1 = this.location.x + Math.cos(angle) * this.base;
+		var y1 = this.location.y + Math.sin(angle) * this.base;
 
-	var x2 = this.location.x + Math.cos(angle + Sim.globals.HALF_PI) * this.base;
-	var y2 = this.location.y + Math.sin(angle + Sim.globals.HALF_PI) * this.base;
+		var x = this.location.x - Math.cos(angle) * this.length;
+		var y = this.location.y - Math.sin(angle) * this.length;
 
-	var x3 = this.location.x + Math.cos(angle - Sim.globals.HALF_PI) * this.base;
-	var y3 = this.location.y + Math.sin(angle - Sim.globals.HALF_PI) * this.base;
+		var x2 = this.location.x + Math.cos(angle + Sim.globals.HALF_PI) * this.base;
+		var y2 = this.location.y + Math.sin(angle + Sim.globals.HALF_PI) * this.base;
 
-	// draw the behaviour of the fish (lines)
-	this.drawBehavior(ctx);
-	/*
-		if (this.energy < 0) {
-			this.color = "black";
+		var x3 = this.location.x + Math.cos(angle - Sim.globals.HALF_PI) * this.base;
+		var y3 = this.location.y + Math.sin(angle - Sim.globals.HALF_PI) * this.base;
+
+		// draw the behaviour of the fish (lines)
+		this.drawBehavior(ctx);
+		/*
+			if (this.energy < 0) {
+				this.color = "black";
+			}
+		*/
+		if (Fish.showBehavior && this.mature) {
+			this.color = "pink";
 		}
-	*/
-	if (Fish.showBehavior && this.mature) {
-		this.color = "pink";
+
+
+		this.color = this.skin;
+		ctx.fillStyle = this.color;
+
+		ctx.beginPath();
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x3, y3);
+		ctx.lineTo(x, y);
+		ctx.lineTo(x2, y2);
+		ctx.closePath();
+
+
+
+		ctx.fill();
+		ctx.stroke();
+
+		ctx.save();
+		if (this.tail.length > 10) {
+			this.tail.shift();
+		}
+		this.tail.push({
+			x: this.location.x,
+			y: this.location.y
+		});
+
+		ctx.beginPath();
+		for (var i = 0; i < this.tail.length - 1; i++) {
+			ctx.lineWidth = i + 2;
+			var pt1 = this.tail[i];
+			var pt2 = this.tail[i + 1];
+			ctx.moveTo(pt1.x, pt1.y);
+			ctx.lineTo(pt2.x, pt2.y);
+
+		}
+		ctx.strokeStyle = this.color;
+		ctx.stroke();
+		ctx.restore();
+
+		this.strokeStyle = 'black';
+		this.lineWidth = 1;
+
+
+		//this.vision.draw(ctx);
+
+
+		//this.nose.draw(ctx);
+
+		function getPointAL(x, y, angle, length) {
+			var radA = angle;
+			return {
+				x: x + length * Math.cos(radA),
+				y: y + length * Math.sin(radA)
+			};
+		};
+
+		function drawLineAL(x, y, angle, length) {
+			ctx.moveTo(x, y);
+			var otherPoint = getPointAL(x, y, angle, length);
+			ctx.lineTo(otherPoint.x, otherPoint.y);
+			ctx.stroke();
+		};
+
+		ctx.save();
+		ctx.strokeStyle = 'red';
+		drawLineAL(this.location.x, this.location.y, this.angle, this.velocity.mag() * 5);
+		var acA = this.accelDraw.angle();
+
+		var acL = this.accelDraw.mag();
+
+		ctx.strokeStyle = 'blue';
+		drawLineAL(this.location.x, this.location.y, acA, acL * 75);
+
+		ctx.lineWidth = 3;
+		//console.log(this.energy);
+		ctx.strokeStyle = 'green';
+		drawLineAL(this.location.x - 5, this.location.y - 15, 0, 10);
+		ctx.restore();
+		ctx.strokeStyle = 'black';
+		ctx.restore();
 	}
-
-	// draw the fish on the canvas
-	ctx.lineWidth = this.energy / 3;
-	ctx.fillStyle = this.color;
-	//ctx.strokeStyle = this.color;
-	ctx.beginPath();
-	ctx.moveTo(x1, y1);
-	ctx.lineTo(x3, y3);
-	ctx.lineTo(x, y);
-	ctx.lineTo(x2, y2);
-
-
-	ctx.closePath();
-	//ctx.quadraticCurveTo(x2, y2, x, y);
-	//ctx.quadraticCurveTo(x3, y3, x1, y1);
-	//ctx.stroke();
-	ctx.fill();
-	ctx.stroke();
 };
 
 Fish.prototype.drawBehavior = function drawBehavior() {
-	var ctx = Sim.globals.ctx;
+	Fish.showBehavior = true;
+	var ctx = Sim.renderer.ctx;
 	if (Fish.showBehavior) {
-		var old = ctx.globalAlpha;
-		ctx.globalAlpha = 0.2;
+		//var old = ctx.globalAlpha;
+		//ctx.globalAlpha = 0.2;
 
 		// draw avoid behaviour
 		if (this.avoidList && this.avoidList.length) {
@@ -384,14 +490,10 @@ Fish.prototype.drawBehavior = function drawBehavior() {
 			ctx.stroke();
 		}
 
-		// clear the lists
-		this.avoidList = null;
-		this.eatList = null;
-		this.shoalList = null;
-		this.mateList = null;
+
 
 		// restore alpha
-		ctx.globalAlpha = old;
+		//	ctx.globalAlpha = old;
 	}
 	else {
 		this.color = this.skin;
@@ -400,41 +502,63 @@ Fish.prototype.drawBehavior = function drawBehavior() {
 
 Fish.prototype.update = function() {
 	// move the fish
+	this.accelDraw = this.acceleration.clone();
 
 	this.velocity.add(this.acceleration);
 	this.velocity.limit(this.maxspeed);
-	if (this.velocity.mag() < 3) {
-		this.velocity.setMag(5);
-	}
+
+
 
 	this.location.add(this.velocity);
 	this.acceleration.limit(this.maxforce);
 
-	// spend energy
-	this.energy -= (((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100) * 2;
+	this.energy -= (((this.acceleration.mag() * this.mass) * this.age * this.velocity.mag()) / 100);
 
-	// die
-	/*
-	if (this.energy < 0) {
-		this.dead = true;
-	}
-*/
-	// grow older
+
 	this.age *= 1.00005;
 	this.mature = this.age > this.fertility;
-
+	this.mass += 0.001;
 	// reset acceleration
 	this.acceleration.mul(0);
 	this.angle = this.velocity.angle();
-	if(this.model){
-		//this.model.rotateOnAxis(new THREE.Vector3(0,1,0),this.angle);
-		this.model.rotation.y = this.angle;
-		this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.02 * this.mass;
-		//console.log(this.model.scale.x);
+	if (do3D) {
+		if (this.model) {
+			//this.model.rotateOnAxis(new THREE.Vector3(0,1,0),this.angle);
+			this.model.rotation.y = this.angle;
+			this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.02 * this.mass;
+			//console.log(this.model.scale.x);
+		}
 	}
 	//console.log(this.mass);
+	if (this.energy <= 0) {
+		this.dead = true;
+	}
+
+
+	this.vision.x = this.location.x;
+	this.vision.y = this.location.y;
+	this.vision.direction = this.angle;
+	this.vision.radius = this.lookRange;
+
+	this.nose.x = this.location.x;
+	this.nose.y = this.location.y;
+	this.nose.direction = this.angle;
+	this.nose.radius = this.smellRange;
+
+
+	if (this.location.x < -5) {
+		this.location.x = sea.width - 5;
+	}
+	if (this.location.x > sea.width + 5) {
+		this.location.x = 5;
+	}
+	if (this.location.y < -5) {
+		this.location.y = sea.height - 5;
+	}
+	if (this.location.y > sea.height + 5) {
+		this.location.y = 5;
+	}
 };
 
-Fish.showBehavior = false;
 
 Fish.random = Math.random();

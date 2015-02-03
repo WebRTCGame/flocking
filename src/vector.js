@@ -37,12 +37,19 @@ Vector.prototype = {
 
 		return this;
 	},
+	subtract: function(v){
+		return this.sub(v);
+	},
 
 	mul: function(s) {
 		this.x *= s;
 		this.y *= s;
 
 		return this;
+	},
+	multiply: function(s){
+		
+		return this.mul(s);
 	},
 	div: function(s) {
 		!s && console.log('Division by zero!');
@@ -52,11 +59,27 @@ Vector.prototype = {
 
 		return this;
 	},
+	divide: function(s){
+		return this.div(s)
+	},
 	mag: function() {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	},
+	magnitude: function(){
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	},
+	length: function(){
+		return this.mag();
+	},
+	truncate: function(value){
+		if (this.length()>value){
+			this.normalize();
+			this.multiply(value);
+		}
+		return this;
+	},
 	normalize: function() {
-		var mag = this.mag();
+		var mag = this.magnitude();
 		mag && this.div(mag);
 		return this;
 	},
