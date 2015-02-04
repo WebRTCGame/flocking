@@ -1,5 +1,5 @@
 /*jshint camelcase: true, browser:true, maxlen: 100, curly: true, eqeqeq: true, immed: true, latedef: true, noarg: true, noempty: true, nonew: true, quotmark: true, undef: true, unused: true, strict: true, maxdepth: 3, maxstatements:20, maxcomplexity: 5 */
-/* global $:true, Vector:true, Fish:true, Food:true, utils:true, BaseRenderable:true, Behaviors: true, Sim:true */
+/* global $:true, Vector:true, Fish:true,  utils:true, BaseRenderable:true, Behaviors: true, Sim:true, sea: true, CircleSegment: true */
 
 
 // Fish constructor
@@ -12,7 +12,7 @@ function Fish(mass, x, y, hue) {
 
 
 
-	var self = this;
+	//var self = this;
 	//this._energy = this.mass * Sim.globals.ENERGY;
 	this.energy = this._mass * Sim.globals.ENERGY;
 
@@ -90,8 +90,8 @@ function Fish(mass, x, y, hue) {
 	this.accelDraw = new Vector(0, 0);
 	this.wandering = new Vector(0.2, 0.2);
 	this.angle = this.velocity.angle();
-	var tint = utils.hsv2rgb(this.hue, 1, 1);
-	this.model = Sim.threeD.generateModel('rgb(' + tint.r + ',' + tint.g + ',' + tint.b + ')', 0.02 * this.mass);
+	//var tint = utils.hsv2rgb(this.hue, 1, 1);
+
 	/*
 		if (Sim.threeD.dae) {
 			this.model = Sim.threeD.dae.clone(); //undefined;//dae.clone();
@@ -160,10 +160,8 @@ Fish.prototype.parseFishNeighbors = function(sea) {
 				this.shoalList.push(other);
 
 				//is shoalable and mature
-				if (this.mature) {
-					if (other.mature) {
-						this.mateList.push(other);
-					}
+				if (this.mature && other.mature) {
+					this.mateList.push(other);
 				}
 			}
 		}
@@ -306,7 +304,7 @@ Fish.prototype.identifyFood = function() { //var iAngle = Sim.globals.TWO_PI;
 Fish.prototype.identifyFish = function() {
 
 
-	for (var retVal = [],fishList = sea.population, i = 0; i < fishList.length; i++) {
+	for (var retVal = [], fishList = sea.population, i = 0; i < fishList.length; i++) {
 		if (fishList[i] !== null && fishList[i] !== undefined && fishList[i] !== this) {
 			if (this.vision.contains(fishList[i].location.x, fishList[i].location.y)) {
 				retVal.push(fishList[i]);
@@ -439,8 +437,7 @@ Fish.prototype.drawBehavior = function drawBehavior() {
 	Fish.showBehavior = true;
 	var ctx = Sim.renderer.ctx;
 	if (Fish.showBehavior) {
-		//var old = ctx.globalAlpha;
-		//ctx.globalAlpha = 0.2;
+
 
 		// draw avoid behaviour
 		if (this.avoidList && this.avoidList.length) {
@@ -491,9 +488,6 @@ Fish.prototype.drawBehavior = function drawBehavior() {
 		}
 
 
-
-		// restore alpha
-		//	ctx.globalAlpha = old;
 	}
 	else {
 		this.color = this.skin;
@@ -521,14 +515,7 @@ Fish.prototype.update = function() {
 	// reset acceleration
 	this.acceleration.mul(0);
 	this.angle = this.velocity.angle();
-	if (do3D) {
-		if (this.model) {
-			//this.model.rotateOnAxis(new THREE.Vector3(0,1,0),this.angle);
-			this.model.rotation.y = this.angle;
-			this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.02 * this.mass;
-			//console.log(this.model.scale.x);
-		}
-	}
+
 	//console.log(this.mass);
 	if (this.energy <= 0) {
 		this.dead = true;

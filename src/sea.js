@@ -10,13 +10,13 @@ sea.randomPoint = function() {
 };
 
 sea.populateFish = function() {
-	//console.log(Sim.threeD.dae);
+	
 	for (var i = 0; i < Sim.globals.POPULATION; i++) {
 
 		var randomPoint = this.randomPoint();
 
-		var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
-		var randomMass = Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
+	//	var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
+		var randomMass = window.utils.randomBetween(Sim.globals.MIN_MASS,Sim.globals.MAX_MASS/2);//Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
 
 
 		var fish = new Fish(randomMass, randomPoint.x, randomPoint.y);
@@ -27,14 +27,13 @@ sea.populateFish = function() {
 };
 
 sea.populateFood = function() {
-	//	var initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
+	
 	for (var i = 0; i < Sim.globals.initialFood; i++) {
-		// initial values
+		
 		var randomPoint2 = this.randomPoint();
 
 		var foodAmmount = Math.random() * 100 + 20;
 
-		// create food
 		var food = new Food(randomPoint2.x, randomPoint2.y, foodAmmount);
 
 		this.food.push(food);
@@ -52,7 +51,7 @@ sea.updateFood = function() {
 
 			food.doUpdate(sea);
 			food.doRender();
-			//this.food[i].draw();
+			
 
 		}
 		else {
@@ -84,10 +83,14 @@ sea.updateFish = function() {
 
 };
 sea.init = function() {
+	
+	this.width = Sim.renderer.canvas.width;
+	this.height = Sim.renderer.canvas.height;
 	this.populateFish();
 	this.populateFood();
 };
 sea.update = function() {
+	
 	this.updateFood();
 	this.updateFish();
 };
