@@ -2,9 +2,9 @@
 /* global Vector:true, Food:true, Sim:true, Boid:true, sea:true */
 
 var Food = function Food(x, y, amount) {
-
+	'use strict';
 	Boid.call(this, x, y);
-	console.log("food created");
+
 	this.velocity = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1);
 	this.population = amount;
 	this.food = [];
@@ -20,6 +20,7 @@ var Food = function Food(x, y, amount) {
 Food.prototype = Object.create(Boid.prototype);
 
 Food.prototype.render = function render() {
+	'use strict';
 	Sim.renderer.ctx.beginPath();
 	Sim.renderer.ctx.arc(this.location.x, this.location.y, (this.food.length + 1) / 4, 0, 2 * Math.PI, false);
 	Sim.renderer.ctx.fillStyle = 'rgba(0,0,255,0.25)';
@@ -29,6 +30,7 @@ Food.prototype.render = function render() {
 	}
 };
 Food.prototype.preUpdate = function preUpdate() {
+	'use strict';
 	var loc = this.location.clone();
 	for (var i = 0; i < this.food.length; i++) {
 		var seekval = Behaviors.seek(this.food[i], loc);
@@ -38,6 +40,7 @@ Food.prototype.preUpdate = function preUpdate() {
 };
 
 Food.prototype.postUpdate = function postUpdate(world) {
+	'use strict';
 	for (var i = 0; i < this.food.length; i++) {
 		this.food[i].doUpdate();
 	}
@@ -57,7 +60,7 @@ Food.prototype.postUpdate = function postUpdate(world) {
 };
 
 Food.prototype.eatenBy = function eatenBy(fish) {
-
+	'use strict';
 	this.food.pop();
 
 	if (fish.energy < fish.mass * Sim.globals.ENERGY) {
@@ -78,16 +81,16 @@ Food.prototype.eatenBy = function eatenBy(fish) {
 
 
 var FoodBit = function FoodBit(x, y) {
+	'use strict';
 	Boid.call(this, x, y);
 };
 FoodBit.prototype = Object.create(Boid.prototype);
 
 FoodBit.prototype.render = function() {
-
+	'use strict';
 	Sim.renderer.ctx.beginPath();
 	Sim.renderer.ctx.arc(this.location.x, this.location.y, 5, 0, 2 * Math.PI, false);
 	Sim.renderer.ctx.fillStyle = 'rgba(0,255,0,0.25)';
 	Sim.renderer.ctx.fill();
 
 };
-

@@ -1,0 +1,5 @@
+browserify main.js -t babelify --outfile bundle.js
+browserify -d -e script.js -t [ babelify --sourceMapRelative . ]
+
+
+browserify -e main.js -t [ babelify --experimental ] --debug | exorcist bundle.js.map > bundle.js

@@ -6,7 +6,7 @@
         "@useSoftTabs": "true"
     },
     "build": {
-        "@builder": "auto",
+        "@builder": "My Builder",
         "@path": "/.c9/builders",
         "@saveall": true
     },
@@ -22,7 +22,7 @@
     },
     "run": {
         "@path": "/.c9/runners",
-        "@runner": "Apache httpd (PHP, HTML)",
+        "@runner": "io.js",
         "configs": {
             "@inited": "true",
             "json()": {}

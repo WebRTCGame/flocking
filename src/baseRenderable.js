@@ -2,6 +2,7 @@
 /* global Vector:true , Sim:true*/
 
 var BaseRenderable = function(x, y) {
+    'use strict';
     if (!(this instanceof BaseRenderable)) {
 		return new BaseRenderable(x, y);
 	}

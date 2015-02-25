@@ -3,6 +3,7 @@
 
 
 sea.randomPoint = function() {
+	'use strict';
 	return {
 		x: Math.random() * this.width,
 		y: Math.random() * this.height
@@ -10,13 +11,13 @@ sea.randomPoint = function() {
 };
 
 sea.populateFish = function() {
-	
+'use strict';
 	for (var i = 0; i < Sim.globals.POPULATION; i++) {
 
 		var randomPoint = this.randomPoint();
 
-	//	var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
-		var randomMass = window.utils.randomBetween(Sim.globals.MIN_MASS,Sim.globals.MAX_MASS/2);//Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
+		//	var fourRandoms = (Math.random() * Math.random() * Math.random() * Math.random());
+		var randomMass = window.utils.randomBetween(Sim.globals.MIN_MASS, Sim.globals.MAX_MASS / 2); //Sim.globals.MIN_MASS + fourRandoms * Sim.globals.MAX_MASS;
 
 
 		var fish = new Fish(randomMass, randomPoint.x, randomPoint.y);
@@ -27,12 +28,13 @@ sea.populateFish = function() {
 };
 
 sea.populateFood = function() {
-	
-	for (var i = 0; i < Sim.globals.initialFood; i++) {
-		
-		var randomPoint2 = this.randomPoint();
+'use strict';
+const initFood = Sim.globals.initialFood();
+	for (let i = 0; i < initFood; i++) {
 
-		var foodAmmount = Math.random() * 100 + 20;
+		const randomPoint2 = this.randomPoint();
+
+		const foodAmmount = Math.random() * 100 + 20;
 
 		var food = new Food(randomPoint2.x, randomPoint2.y, foodAmmount);
 
@@ -41,17 +43,18 @@ sea.populateFood = function() {
 	}
 
 };
-sea.updateFood = function() {
 
-	for (var i = 0; i < this.food.length; i++) {
-		var food = this.food[i];
+sea.updateFood = function() {
+'use strict';
+	for (let i = 0; i < this.food.length; i++) {
+		let food = this.food[i];
 
 		if (food && !food.dead && food !== null) {
 
 
 			food.doUpdate(sea);
 			food.doRender();
-			
+
 
 		}
 		else {
@@ -66,31 +69,36 @@ sea.updateFood = function() {
 };
 
 sea.updateFish = function() {
+	'use strict';
 	function isNotDead(element) {
 		//var isDead = element === null || element.dead;
 		return element !== null;
 	}
 
-	this.population = this.population.filter(isNotDead);
-	for (var i = 0; i < this.population.length; i++) {
-		this.population[i].swim(this);
-		this.population[i].doUpdate(this);
-		this.population[i].doRender();
-		if (this.population[i].dead) {
-			this.population[i] = null;
+	//this.population = this.population.filter(isNotDead);
+	
+	for (let i = 0; i < this.population.length; i++) {
+		if (this.population[i] !== null) {
+			this.population[i].popIndex = i;
+			this.population[i].swim(this);
+			this.population[i].doUpdate(this);
+			this.population[i].doRender();
+			if (this.population[i].dead) {
+				this.population[i] = null;
+			}
 		}
 	}
 
 };
 sea.init = function() {
-	
+'use strict';
 	this.width = Sim.renderer.canvas.width;
 	this.height = Sim.renderer.canvas.height;
 	this.populateFish();
 	this.populateFood();
 };
 sea.update = function() {
-	
+'use strict';
 	this.updateFood();
 	this.updateFish();
 };

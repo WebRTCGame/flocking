@@ -2,7 +2,7 @@
 /* global   THREE:true*/
 
 
-var Sim = {
+window.Sim = {
         globals: {
 
                 ENERGY: 10,
@@ -20,7 +20,10 @@ var Sim = {
                 FOOD_RATIO: 0.5,
                 SCREEN: 1.5,
                 HALF_PI: Math.PI * 0.5,
-                TWO_PI: Math.PI * 2
+                TWO_PI: Math.PI * 2,
+                initialFood: function() {
+                        return Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
+                }
         },
         renderer: {
                 fps: 30,
@@ -30,14 +33,30 @@ var Sim = {
                 delta: 0,
                 canvas: undefined,
                 ctx: undefined,
-                init: function init(canvasElem,width,height) {
+                init: function init(canvasElem, width, height) {
                         this.canvas = canvasElem;
-
                         this.then = Date.now();
                         this.fpsInterval = 1000 / this.fps;
-                        this.canvas.width = width;
-                        this.canvas.height = height;
+
+                        this.canvas.style.height = '800px'; //document.body.clientHeight;
+                        this.canvas.style.width = '800px'; //document.body.clientHeight;
+                        this.canvas.width = 1600; //width;
+                        this.canvas.height = 1600; //height;
                         this.ctx = this.canvas.getContext("2d");
+                },
+                doDraw: {
+                        dfish: true,
+                        dfishTail: true,
+                        dfishVelocity: true,
+                        dfishAcceleration: true,
+                        dfishSight: true,
+                        dfishSmell: true,
+                        dfishAvoid: true,
+                        dfishPredator: true,
+                        dfishShoal: true,
+                        dfishMate: true,
+                        dfood: true,
+                        dfoodCenter: true
                 }
 
         }
@@ -46,9 +65,9 @@ var Sim = {
 
 
 
-Sim.globals.initialFood = Sim.globals.POPULATION * Sim.globals.FOOD_RATIO;
 
-var sea = {
+
+window.sea = {
         width: 0,
         height: 0,
         population: [],

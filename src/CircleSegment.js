@@ -1,4 +1,5 @@
 var CircleSegment = function(x, y, radius, theta, direction) {
+    'use strict';
     Object.apply(this, arguments);
     
     this.x = x || 0;
@@ -12,20 +13,24 @@ var CircleSegment = function(x, y, radius, theta, direction) {
 CircleSegment.prototype = Object.create(Object.prototype);
 
 CircleSegment.prototype.clone = function() {
+    'use strict';
     return new CircleSegment(this.x, this.y, this.radius, this.theta, this.direction);
 };
 CircleSegment.prototype.arcFrom = function() {
-    return wrap2P(this.direction - this.theta * 0.5);
+    'use strict';
+    return window.utils.wrap2P(this.direction - this.theta * 0.5);
 };
 CircleSegment.prototype.arcTo = function() {
-    return wrap2P(this.direction + this.theta * 0.5);
+    'use strict';
+    return window.utils.wrap2P(this.direction + this.theta * 0.5);
 };
 CircleSegment.prototype.isNear = function(x, y) {
+    'use strict';
     return near(x, y, this.x, this.y, this.radius);
 };
 
 CircleSegment.prototype.contains = function(x, y) {
-
+'use strict';
 
     var fromAngle = this.arcFrom(),
     toAngle = this.arcTo(),
@@ -43,6 +48,7 @@ CircleSegment.prototype.contains = function(x, y) {
 };
 
 CircleSegment.prototype.draw = function(ictx) {
+    'use strict';
     //console.log("csdraw");
     ictx.save();
     ictx.beginPath();
@@ -57,6 +63,7 @@ CircleSegment.prototype.draw = function(ictx) {
 };
 
 CircleSegment.prototype.update = function(boid){
+    'use strict';
     this.x = boid.location.x;
     this.y = boid.location.y;
     this.direction = boid.angle;

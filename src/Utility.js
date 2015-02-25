@@ -349,7 +349,8 @@ function ptInTriangle(p, p0, p1, p2) {
     return s > 0 && t > 0 && (s + t) < 2 * A * sign;
 }
 
-function toRadians(deg) {
+window.utils.toRadians = function(deg) {
+    'use strict';
     return deg * Math.PI / 180;
 };
 
@@ -370,7 +371,7 @@ function pointAngle(x1, y1, x2, y2) {
     //var tempX = x2 - x1;
     //var tempY = y2 - y1;
 
-    return wrap2P(Math.atan2(y2 - y1, x2 - x1));
+    return window.utils.wrap2P(Math.atan2(y2 - y1, x2 - x1));
 
     //return theta; //theta * 180 / Math.PI;
 };
@@ -391,22 +392,23 @@ function near(x1, y1, x2, y2, length) {
 };
 
 function getPointAL(x, y, angle, length) {
-    var radA = toRadians(angle);
+    var radA = window.utils.toRadians(angle);
     return {
         x: x + length * Math.cos(radA),
         y: y + length * Math.sin(radA)
     };
 };
 
-function wrap2P(b) {
+window.utils.wrap2P = function(b) {
     0 > b && (b += PI2);
     b > PI2 && (b -= PI2);
     return b;
-}
+};
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
+
 window.utils.randomBetween = function (min, max) {
     return Math.random() * (max - min + 1) + min;
 };

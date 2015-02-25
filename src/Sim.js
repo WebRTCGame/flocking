@@ -3,13 +3,13 @@
 
 
 document.addEventListener("DOMContentLoaded", function() {
-    
-    Sim.renderer.init(document.getElementById("canvas"), 800, 800);
-    
+    'use strict';
+    Sim.renderer.init(document.getElementById("canvas"), 1600, 1600);
+
     sea.init();
 
     Sim.renderer.process = function process() {
-
+        'use strict';
         window.requestAnimationFrame(Sim.renderer.process, Sim.renderer.canvas);
 
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
     };
-    
+
     Sim.renderer.process();
 
 });
