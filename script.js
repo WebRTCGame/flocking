@@ -36,6 +36,7 @@ setTimeout(function() {
     terminal.stdin.write('echo "Hello $USER. Your machine runs since:"\n');
     terminal.stdin.write('uptime\n');
     terminal.stdin.write('git add --all && git commit -m "comment"\n');
+    terminal.stdin.write('git push\n');
     console.log('Ending terminal session');
     terminal.stdin.end();
 }, 1000);
