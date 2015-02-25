@@ -19,6 +19,10 @@ import * as V from "./Gvector.js";
 console.log(JSON.stringify(V));
 console.log(JSON.stringify(V.prototype));
 var Vec = new Vector(5,1);
+console.log(Vec.x);
+import {Point} from "./Gpoint";
+var P1 = new Point(10,20);
+console.log(P1.x);
 
 export function createCanvas() {
     document.addEventListener("DOMContentLoaded", (event) => {

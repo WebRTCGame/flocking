@@ -22,7 +22,7 @@
     },
     "run": {
         "@path": "/.c9/runners",
-        "@runner": "io.js",
+        "@runner": "Apache httpd (PHP, HTML)",
         "configs": {
             "@inited": "true",
             "json()": {}
