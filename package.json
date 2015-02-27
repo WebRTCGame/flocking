@@ -1,0 +1,34 @@
+{
+  "name": "flocking",
+  "version": "0.0.3",
+  "description": "flocking / boids / Autonomous Agents",
+  "main": "main.js",
+  "dependencies": {
+    "babelify": "^5.0.3",
+    "exorcist": "^0.1.6",
+    "browserify": "^9.0.3",
+    "fs": "^0.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WebRTCGame/flocking.git"
+  },
+  "keywords": [
+    "boids",
+    "flocking",
+    "steering",
+    "behaviors",
+    "atonomous",
+    "agents"
+  ],
+  "author": "George Endrulat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WebRTCGame/flocking/issues"
+  },
+  "homepage": "https://github.com/WebRTCGame/flocking"
+}

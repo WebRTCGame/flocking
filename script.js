@@ -1,4 +1,4 @@
-console.log("Starting Script");
+console.log("Starting browserify built script");
 var fs = require("fs"),
   browserify = require("browserify"),
   babelify = require("babelify");
@@ -18,4 +18,3 @@ browserify({
   })
   .pipe(fs.createWriteStream("bundle.js"));
 
-console.log("Done With Script");
